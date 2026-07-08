@@ -1,0 +1,2586 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="theme-color" content="#e07b4c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="共享点餐">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>🍳 小王的厨房</title>
+    <script>
+        (function() {
+            const m = {
+                name: '小王的厨房',
+                short_name: '点餐',
+                start_url: location.href.split('?')[0],
+                display: 'standalone',
+                background_color: '#faf7f4',
+                theme_color: '#e07b4c',
+                icons: [{
+                    src: 'data:image/svg+xml,' + encodeURIComponent(
+                        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="32" fill="#e07b4c"/><text x="96" y="130" font-size="96" text-anchor="middle">🍳</text></svg>'
+                    ),
+                    sizes: '192x192',
+                    type: 'image/svg+xml'
+                }]
+            };
+            const b = new Blob([JSON.stringify(m)], { type: 'application/json' });
+            const l = document.createElement('link');
+            l.rel = 'manifest';
+            l.href = URL.createObjectURL(b);
+            document.head.appendChild(l);
+        })();
+    </script>
+    <script>
+        window.__gunLoaded = false;
+        window.__seaLoaded = false;
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/gun@0.2020.1237/gun.js"
+        onload="window.__gunLoaded=true;" onerror="var s=document.createElement('script');s.src='https://unpkg.com/gun@0.2020.1237/gun.js';s.onload=function(){window.__gunLoaded=true;};document.head.appendChild(s);">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/gun@0.2020.1237/sea.js" onload="window.__seaLoaded=true;" onerror="">
+    </script>
+
+    <style>
+        :root {
+            --primary: #e07b4c;
+            --primary-dark: #c96a3d;
+            --primary-light: #fce8df;
+            --bg: #faf7f4;
+            --card-bg: #fff;
+            --text: #3d3029;
+            --text-light: #7a6e63;
+            --border: #e8ddd3;
+            --radius: 16px;
+            --radius-sm: 10px;
+            --radius-xs: 8px;
+            --success: #5a9e6f;
+            --success-light: #e8f5ec;
+            --danger: #d45b4a;
+            --danger-light: #fef0ee;
+            --shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            --game-bg: #1a1a2e;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding-bottom: env(safe-area-inset-bottom);
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            line-height: 1.5;
+        }
+        .app-header {
+            background: rgba(255, 255, 255, 0.92);
+            border-bottom: 1px solid var(--border);
+            padding: 10px 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+        }
+        .header-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .app-logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            white-space: nowrap;
+        }
+        .room-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #f5f0ea;
+            border-radius: 22px;
+            padding: 5px 14px;
+            font-size: 0.82rem;
+        }
+        .room-badge input {
+            border: none;
+            background: transparent;
+            font-weight: 600;
+            color: var(--primary);
+            width: 65px;
+            text-align: center;
+            outline: none;
+            font-size: 0.82rem;
+        }
+        .room-badge button {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 16px;
+            padding: 4px 12px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .room-badge button:active {
+            transform: scale(0.94);
+            opacity: 0.85;
+        }
+        .connection-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ccc;
+            flex-shrink: 0;
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+        .connection-dot.connected {
+            background: var(--success);
+            box-shadow: 0 0 6px rgba(90, 158, 111, 0.5);
+        }
+        .connection-dot.syncing {
+            background: #f0c040;
+            box-shadow: 0 0 8px rgba(240, 192, 64, 0.6);
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                box-shadow: 0 0 4px rgba(240, 192, 64, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 14px rgba(240, 192, 64, 0.8);
+            }
+        }
+        .connection-text {
+            font-size: 0.7rem;
+            color: #aaa;
+            white-space: nowrap;
+        }
+        .btn-install {
+            display: none;
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 2px solid var(--primary);
+            background: #fff;
+            color: var(--primary);
+            font-size: 0.78rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .btn-install.show {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-nick {
+            padding: 7px 14px;
+            border-radius: 20px;
+            border: 1.5px solid var(--border);
+            background: #fff;
+            color: var(--text);
+            font-size: 0.78rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: 0.2s;
+            white-space: nowrap;
+            max-width: 140px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .btn-nick.has-nick {
+            color: var(--primary);
+            border-color: var(--primary-light);
+            background: #fffaf7;
+            font-weight: 600;
+        }
+        .nav-tabs {
+            display: flex;
+            gap: 4px;
+            background: #f5f0ea;
+            border-radius: 28px;
+            padding: 4px;
+            flex-wrap: wrap;
+        }
+        .nav-tab {
+            padding: 8px 14px;
+            border-radius: 24px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 0.84rem;
+            color: var(--text-light);
+            transition: 0.2s;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+        .nav-tab.active {
+            background: #fff;
+            color: var(--primary);
+            font-weight: 650;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        .nav-tab .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 9px;
+            background: #e85d3f;
+            color: #fff;
+            font-size: 0.68rem;
+            margin-left: 4px;
+            padding: 0 5px;
+            font-weight: 700;
+        }
+        .main-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+        .page {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .page.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .search-box {
+            margin-bottom: 12px;
+            display: flex;
+            gap: 8px;
+        }
+        .search-box input {
+            flex: 1;
+            padding: 10px 16px;
+            border-radius: 24px;
+            border: 1.5px solid var(--border);
+            font-size: 0.9rem;
+            background: #fff;
+            outline: none;
+        }
+        .category-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .cat-btn {
+            padding: 6px 15px;
+            border-radius: 20px;
+            border: 1.5px solid var(--border);
+            background: #fff;
+            cursor: pointer;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            transition: 0.2s;
+        }
+        .cat-btn.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+        .dish-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 12px;
+        }
+        .dish-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 16px 12px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: 0.2s;
+            cursor: pointer;
+            position: relative;
+        }
+        .dish-card:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+        }
+        .dish-card:active {
+            transform: scale(0.97);
+        }
+        .dish-card .tutorial-hint {
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            font-size: 0.7rem;
+            color: #c9a87c;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        .dish-card .video-hint {
+            position: absolute;
+            top: 8px;
+            left: 10px;
+            font-size: 0.7rem;
+            color: #5a8fbf;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        .dish-icon-wrap {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+        .dish-icon-wrap svg {
+            width: 100%;
+            height: 100%;
+        }
+        .dish-name {
+            font-weight: 650;
+            margin: 4px 0;
+            font-size: 0.95rem;
+            pointer-events: none;
+        }
+        .dish-price {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 1.05rem;
+            pointer-events: none;
+        }
+        .btn-add-cart {
+            margin-top: 10px;
+            padding: 7px 18px;
+            border-radius: 20px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.82rem;
+            width: 100%;
+            transition: 0.15s;
+            position: relative;
+            z-index: 2;
+        }
+        .btn-add-cart:active {
+            transform: scale(0.95);
+            opacity: 0.85;
+        }
+        .btn-qty {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            background: #fff;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.15s;
+            position: relative;
+            z-index: 2;
+        }
+        .btn-qty:active {
+            transform: scale(0.9);
+        }
+        .btn-qty.plus {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .btn-qty.minus {
+            border-color: #d0c8bd;
+            color: #8c7b6b;
+        }
+        .card-cart-ctrl {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+            font-weight: 600;
+            position: relative;
+            z-index: 2;
+        }
+        .cart-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .cart-item-card {
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 14px 16px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid transparent;
+            flex-wrap: wrap;
+        }
+        .cart-item-icon,
+        .order-item-icon {
+            width: 52px;
+            height: 52px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .cart-item-icon svg,
+        .order-item-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+        .cart-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .cart-item-info .ci-name {
+            font-weight: 650;
+            font-size: 0.95rem;
+            cursor: pointer;
+            color: var(--primary);
+            text-decoration: underline;
+            text-decoration-color: transparent;
+            transition: 0.2s;
+        }
+        .cart-item-info .ci-name:hover {
+            text-decoration-color: var(--primary);
+        }
+        .cart-item-info .ci-unit-price {
+            font-size: 0.78rem;
+            color: var(--text-light);
+        }
+        .cart-item-qty {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .cart-item-qty span.qty-val {
+            font-weight: 700;
+            min-width: 22px;
+            text-align: center;
+        }
+        .cart-item-subtotal {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.05rem;
+            flex-shrink: 0;
+            min-width: 55px;
+            text-align: right;
+        }
+        .cart-item-remove {
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: #fef0ee;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.15s;
+        }
+        .cart-item-remove:active {
+            background: #fdd;
+            transform: scale(0.9);
+        }
+        .cart-empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            background: #fff;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+        .cart-summary-bar {
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            position: sticky;
+            bottom: 8px;
+            border: 2px solid #fdf0e8;
+        }
+        .shared-orders-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 58vh;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .date-group {
+            margin-bottom: 4px;
+        }
+        .date-group-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            background: #fdfaf6;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 650;
+            font-size: 0.85rem;
+            color: var(--text);
+            transition: 0.2s;
+            user-select: none;
+            border: 1px solid #f0ece6;
+        }
+        .date-group-header:hover {
+            background: #fdf0e8;
+        }
+        .date-group-header .collapse-arrow {
+            transition: transform 0.25s;
+            font-size: 0.7rem;
+            display: inline-block;
+        }
+        .date-group-header.collapsed .collapse-arrow {
+            transform: rotate(-90deg);
+        }
+        .date-group-body {
+            overflow: hidden;
+            transition: max-height 0.35s ease, opacity 0.3s ease;
+            max-height: 3000px;
+            opacity: 1;
+        }
+        .date-group-body.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+        .date-group-body-inner {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-top: 6px;
+        }
+        .order-item {
+            background: #fff;
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 4px solid transparent;
+            flex-wrap: wrap;
+        }
+        .order-item.confirmed {
+            border-left-color: var(--success);
+            opacity: 0.75;
+            background: #fdfefd;
+        }
+        .order-item.confirmed .oi-name {
+            text-decoration: line-through;
+            text-decoration-color: #ccc;
+        }
+        .order-item .oi-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .order-item .oi-name {
+            font-weight: 650;
+            font-size: 0.92rem;
+            cursor: pointer;
+            color: var(--primary);
+        }
+        .order-item .oi-name:hover {
+            text-decoration: underline;
+        }
+        .order-item .oi-user {
+            font-size: 0.78rem;
+            color: var(--text-light);
+        }
+        .order-item .oi-time {
+            font-size: 0.72rem;
+            color: #aaa;
+        }
+        .order-item .oi-note {
+            font-size: 0.74rem;
+            color: var(--primary);
+            font-style: italic;
+            background: #fffaf7;
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        .order-item .oi-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: flex-end;
+            flex-shrink: 0;
+        }
+        .btn-confirm {
+            background: var(--success);
+            color: #fff;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 18px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.75rem;
+            transition: 0.15s;
+        }
+        .btn-confirm:active {
+            transform: scale(0.94);
+            opacity: 0.85;
+        }
+        .badge-confirmed {
+            background: var(--success-light);
+            color: var(--success);
+            font-size: 0.7rem;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+        .summary-bar {
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 14px 18px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 14px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .history-section {
+            margin-top: 20px;
+            border-top: 2px solid var(--border);
+            padding-top: 14px;
+        }
+        .history-date-group-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #f9f6f1;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.82rem;
+            color: var(--text);
+            transition: 0.2s;
+            user-select: none;
+            border: 1px solid #ece6db;
+        }
+        .history-date-group-header:hover {
+            background: #f5ede3;
+        }
+        .history-date-group-header .collapse-arrow {
+            transition: transform 0.25s;
+            font-size: 0.7rem;
+            display: inline-block;
+        }
+        .history-date-group-header.collapsed .collapse-arrow {
+            transform: rotate(-90deg);
+        }
+        .history-date-group-body {
+            overflow: hidden;
+            transition: max-height 0.35s ease, opacity 0.3s ease;
+            max-height: 3000px;
+            opacity: 1;
+        }
+        .history-date-group-body.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+        .history-date-group-body-inner {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding-top: 4px;
+        }
+        .history-item {
+            background: #fdfcfb;
+            border-radius: 8px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.88rem;
+            border: 1px solid #f0ece6;
+            flex-wrap: wrap;
+        }
+        .toast-container {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+            max-width: 90vw;
+        }
+        .toast {
+            padding: 10px 18px;
+            border-radius: 24px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.85rem;
+            animation: toastIn 0.4s ease;
+            pointer-events: auto;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            word-break: break-word;
+        }
+        .toast-success {
+            background: var(--success);
+        }
+        .toast-info {
+            background: #5a8fbf;
+        }
+        .toast-warning {
+            background: #e09b4c;
+        }
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-dialog {
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 24px 20px;
+            max-width: 520px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        .modal-dialog .btn-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 8px 18px;
+            border-radius: 24px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.84rem;
+            transition: 0.2s;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn:active {
+            transform: scale(0.94);
+            opacity: 0.85;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+        .btn-secondary {
+            background: #f5f0ea;
+            color: var(--text);
+        }
+        .btn-danger-outline {
+            background: #fff;
+            color: var(--danger);
+            border: 1.5px solid #f0d0ca;
+        }
+        .btn-xs {
+            padding: 4px 10px;
+            font-size: 0.7rem;
+            border-radius: 14px;
+        }
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: 0.75rem;
+            border-radius: 18px;
+        }
+        .btn-accent {
+            background: #5a8fbf;
+            color: #fff;
+        }
+        .mgmt-dish-list {
+            list-style: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .mgmt-dish-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 8px;
+            border-bottom: 1px solid #f0ece6;
+            flex-wrap: wrap;
+        }
+        .emoji-opt {
+            width: 34px;
+            height: 34px;
+            border: none;
+            background: #f5f0ea;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: 0.15s;
+        }
+        .emoji-opt:hover {
+            background: #e8ddd3;
+            transform: scale(1.1);
+        }
+        .form-group {
+            margin-bottom: 10px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+            color: var(--text-light);
+        }
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 9px;
+            border-radius: var(--radius-xs);
+            border: 1.5px solid #ddd;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(224, 123, 76, 0.1);
+        }
+        .sync-status-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .sync-status-bar.local {
+            background: #fffbf0;
+            color: #b8860b;
+            border: 1px solid #f0d080;
+        }
+        .sync-status-bar.online {
+            background: #f0faf4;
+            color: #2d6a3f;
+            border: 1px solid #b8dcc8;
+        }
+        .sync-status-bar.connecting {
+            background: #f8f4ff;
+            color: #5b4a9e;
+            border: 1px solid #d0c8f0;
+        }
+        .game-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .game-select-btn {
+            padding: 10px 20px;
+            border-radius: 24px;
+            border: 2px solid var(--border);
+            background: #fff;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .game-select-btn.active {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+        .game-container {
+            background: #fff;
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+        .snake-canvas-wrap,
+        .breakout-canvas-wrap {
+            display: flex;
+            justify-content: center;
+            position: relative;
+        }
+        #snakeCanvas,
+        #breakoutCanvas {
+            border-radius: 12px;
+            background: var(--game-bg);
+            display: block;
+            max-width: 100%;
+            height: auto;
+            touch-action: none;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+        }
+        .snake-info,
+        .breakout-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .snake-score,
+        .breakout-score {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .snake-high-score,
+        .breakout-high-score {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+        .snake-hint,
+        .breakout-hint {
+            font-size: 0.78rem;
+            color: #999;
+            margin-top: 8px;
+        }
+        .game-over-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            color: #fff;
+            z-index: 10;
+        }
+        .game-over-overlay h3 {
+            font-size: 1.5rem;
+        }
+        .guess-section {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .guess-input-row {
+            display: flex;
+            gap: 8px;
+            margin: 16px 0;
+        }
+        .guess-input-row input {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 24px;
+            border: 2px solid var(--border);
+            font-size: 1rem;
+            text-align: center;
+            outline: none;
+        }
+        .guess-history {
+            max-height: 180px;
+            overflow-y: auto;
+            text-align: left;
+            margin-top: 12px;
+            font-size: 0.85rem;
+        }
+        .guess-history .gh-item {
+            padding: 6px 10px;
+            border-bottom: 1px solid #f0ece6;
+            display: flex;
+            justify-content: space-between;
+        }
+        .guess-history .gh-item.too-high {
+            color: #e07b4c;
+        }
+        .guess-history .gh-item.too-low {
+            color: #5a8fbf;
+        }
+        .guess-history .gh-item.correct {
+            color: var(--success);
+            font-weight: 700;
+        }
+        .tutorial-content {
+            text-align: left;
+            background: #fdfaf6;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 12px 0;
+            font-size: 0.88rem;
+            line-height: 1.7;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-line;
+            border: 1px solid #f0ece6;
+        }
+        .tutorial-content strong {
+            color: var(--primary);
+        }
+        .tutorial-video-wrap {
+            margin: 12px 0;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+            position: relative;
+            padding-top: 56.25%;
+            max-width: 100%;
+        }
+        .tutorial-video-wrap iframe,
+        .tutorial-video-wrap video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 12px;
+        }
+        @media (max-width: 768px) {
+            .dish-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .cart-summary-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .order-item .oi-actions {
+                flex-direction: row;
+                width: 100%;
+                justify-content: flex-end;
+            }
+            .nav-tabs {
+                justify-content: center;
+            }
+            .nav-tab {
+                padding: 7px 10px;
+                font-size: 0.75rem;
+            }
+            #snakeCanvas,
+            #breakoutCanvas {
+                width: 100%;
+                max-width: 360px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-inner">
+            <div class="header-left">
+                <div class="app-logo">🍳 小王的厨房</div>
+                <div class="room-badge">
+                    <span class="connection-dot" id="connectionDot"></span>
+                    <input type="text" id="roomInput" maxlength="15" placeholder="房间名">
+                    <button id="btnChangeRoom">切换</button>
+                    <span class="connection-text" id="connectionText">初始化中...</span>
+                </div>
+                <button class="btn-install" id="btnInstall">📲 安装</button>
+                <button class="btn btn-nick" id="btnSetNick">👤 昵称</button>
+            </div>
+            <nav class="nav-tabs" id="navTabs">
+                <button class="nav-tab active" data-page="order">📋 点菜</button>
+                <button class="nav-tab" data-page="cart">🛒 购物车<span class="badge" id="cartBadge" style="display:none;">0</span></button>
+                <button class="nav-tab" data-page="shared">👥 共享订单</button>
+                <button class="nav-tab" data-page="manage">⚙️ 管理</button>
+                <button class="nav-tab" data-page="game">🎮 小游戏</button>
+            </nav>
+        </div>
+    </header>
+    <main class="main-content">
+        <section class="page active" id="page-order">
+            <div class="search-box"><input type="text" id="searchInput" placeholder="🔍 搜索菜品..."><button class="btn btn-secondary btn-sm" id="btnClearSearch">清除</button></div>
+            <div class="category-filter" id="categoryFilter"></div>
+            <div class="dish-grid" id="dishGrid"></div>
+        </section>
+        <section class="page" id="page-cart"><div id="cartContent"></div></section>
+        <section class="page" id="page-shared">
+            <div class="sync-status-bar local" id="syncStatusBar"><span id="syncStatusIcon">📡</span><span id="syncStatusText">本地模式</span><button class="btn btn-xs btn-secondary" id="btnRefreshShared" style="margin-left:auto;">🔄 刷新</button></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+                <h3 style="margin:0;">👥 共享订单 · <span id="displayRoomName"></span></h3>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <button class="btn btn-sm btn-accent" id="btnConfirmAll" style="display:none;">✅ 一键确认全部</button>
+                    <button class="btn btn-sm btn-secondary" id="btnClearSharedOrders">🗑️ 清空我的记录</button>
+                </div>
+            </div>
+            <div class="shared-orders-list" id="sharedOrdersList"><div style="text-align:center;color:#aaa;padding:30px;">暂无共享订单</div></div>
+            <div class="summary-bar" id="sharedSummary" style="display:none;"><div><strong>合计：</strong><span id="sharedTotalPrice" style="font-size:1.2rem;color:var(--primary);font-weight:700;">¥0.00</span></div><div><span id="sharedTotalItems">0</span> 道菜</div></div>
+            <div class="history-section" id="historySection" style="display:none;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                    <h4 style="margin:0;">📜 历史订单</h4>
+                    <button class="btn btn-sm btn-danger-outline" id="btnClearHistory">🗑️ 清除历史</button>
+                </div>
+                <div id="historyList"></div>
+            </div>
+        </section>
+        <section class="page" id="page-manage">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+                <div style="background:#fff;border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);">
+                    <h3 id="mgmtFormTitle">➕ 添加新菜品</h3>
+                    <div class="form-group"><label>📛 菜名</label><input type="text" id="mgmtName" placeholder="例如：红烧肉"></div>
+                    <div class="form-group"><label>💰 价格</label><input type="number" id="mgmtPrice" step="0.01" min="0.01" placeholder="0.00"></div>
+                    <div class="form-group"><label>📂 分类</label><input type="text" id="mgmtCategory" list="cats" placeholder="荤菜/素菜/汤品/主食/其他"><datalist id="cats"><option value="荤菜"><option value="素菜"><option value="汤品"><option value="主食"><option value="凉菜"><option value="小吃"><option value="饮品"><option value="其他"></datalist></div>
+                    <div class="form-group"><label>🎨 图标</label><input type="text" id="mgmtEmoji" maxlength="4" placeholder="🍖"><div class="emoji-picker-row" id="emojiPicker" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;"></div></div>
+                    <div class="form-group"><label>📝 描述</label><textarea id="mgmtDesc" rows="2" placeholder="简短描述..."></textarea></div>
+                    <div class="form-group"><label>📖 详细教程</label><textarea id="mgmtTutorial" rows="4" placeholder="详细烹饪教程...&#10;例如：1.准备食材...&#10;2.热锅凉油...&#10;3.翻炒调味..."></textarea></div>
+                    <div class="form-group"><label>🎬 视频教程链接</label><input type="text" id="mgmtVideo" placeholder="粘贴视频链接（YouTube/B站/MP4等）"><small style="color:#999;">支持YouTube、B站链接或直链视频地址</small></div>
+                    <input type="hidden" id="mgmtEditId">
+                    <div style="display:flex;gap:8px;margin-top:12px;"><button class="btn btn-primary" id="btnSaveDish">💾 保存</button><button class="btn btn-secondary" id="btnCancelEdit" style="display:none;">取消</button></div>
+                </div>
+                <div style="background:#fff;border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);">
+                    <h3>📃 菜单 (<span id="mgmtCount">0</span>)</h3>
+                    <ul class="mgmt-dish-list" id="mgmtDishList"></ul>
+                    <button class="btn btn-danger-outline btn-sm" id="btnResetMenu" style="margin-top:12px;">🔄 恢复默认</button>
+                </div>
+            </div>
+        </section>
+        <section class="page" id="page-game">
+            <div class="game-selector">
+                <button class="game-select-btn active" data-game="snake">🐍 贪吃蛇</button>
+                <button class="game-select-btn" data-game="guess">🎯 猜数字</button>
+                <button class="game-select-btn" data-game="breakout">🧱 打砖块</button>
+            </div>
+            <div class="game-container" id="gameSnakeContainer">
+                <div class="snake-info"><span class="snake-score">🍎 得分：<span id="snakeScore">0</span></span><span class="snake-high-score">🏆 最高：<span id="snakeHighScore">0</span></span><button class="btn btn-primary btn-sm" id="btnSnakeRestart">🔄 重新开始</button></div>
+                <div class="snake-canvas-wrap" id="snakeCanvasWrap"><canvas id="snakeCanvas" width="400" height="400"></canvas></div>
+                <div class="snake-hint">⌨️ 键盘方向键 / 📱 触屏滑动 控制方向 · 🔄 穿墙模式（碰壁从对面出）</div>
+            </div>
+            <div class="game-container" id="gameGuessContainer" style="display:none;">
+                <h3 style="margin-bottom:8px;">🎯 猜数字 (1-100)</h3>
+                <p style="color:var(--text-light);font-size:0.85rem;">我已经想好了一个数字，来猜猜看吧！</p>
+                <div class="guess-section">
+                    <div class="guess-input-row"><input type="number" id="guessInput" min="1" max="100" placeholder="输入数字..."><button class="btn btn-primary" id="btnGuessSubmit">猜！</button></div>
+                    <p id="guessHint" style="font-weight:600;min-height:24px;"></p>
+                    <button class="btn btn-secondary btn-sm" id="btnGuessRestart" style="display:none;">🔄 再来一局</button>
+                    <div class="guess-history" id="guessHistory"></div>
+                </div>
+            </div>
+            <div class="game-container" id="gameBreakoutContainer" style="display:none;">
+                <div class="breakout-info"><span class="breakout-score">🧱 得分：<span id="breakoutScore">0</span></span><span class="breakout-high-score">🏆 最高：<span id="breakoutHighScore">0</span></span><button class="btn btn-primary btn-sm" id="btnBreakoutRestart">🔄 重新开始</button></div>
+                <div class="breakout-canvas-wrap" id="breakoutCanvasWrap"><canvas id="breakoutCanvas" width="400" height="400"></canvas></div>
+                <div class="breakout-hint">⌨️ 左右方向键 / 📱 触屏滑动 控制挡板</div>
+            </div>
+        </section>
+    </main>
+    <div class="toast-container" id="toastContainer"></div>
+    <div id="modalContainer"></div>
+
+    <script>
+        (function() {
+            // ========== 音效系统 ==========
+            const SoundFX = {
+                ctx: null,
+                _bgmInterval: null,
+                _bgmOsc: null,
+                _bgmGain: null,
+                _guessBgmOsc: null,
+                _guessBgmGain: null,
+                _guessBgwOsc2: null,
+                _guessBgwGain2: null,
+                init() { try { this.ctx = new(window.AudioContext || window.webkitAudioContext)(); } catch (e) {} },
+                ensureCtx() {
+                    if (!this.ctx) this.init();
+                    if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+                },
+                play(freq, duration, type = 'square', vol = 0.08) {
+                    this.ensureCtx();
+                    if (!this.ctx) return;
+                    try {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = type;
+                        osc.frequency.value = freq;
+                        gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+                        osc.start();
+                        osc.stop(this.ctx.currentTime + duration);
+                    } catch (e) {}
+                },
+                eat() { this.play(600, 0.08, 'square', 0.06);
+                    setTimeout(() => this.play(900, 0.06, 'square', 0.05), 40); },
+                gameOver() { this.play(200, 0.25, 'sawtooth', 0.1);
+                    setTimeout(() => this.play(150, 0.3, 'sawtooth', 0.08), 150);
+                    setTimeout(() => this.play(100, 0.4, 'triangle', 0.06), 300); },
+                click() { this.play(1000, 0.04, 'sine', 0.04); },
+                success() { this.play(500, 0.06, 'sine', 0.06);
+                    setTimeout(() => this.play(700, 0.06, 'sine', 0.06), 60);
+                    setTimeout(() => this.play(900, 0.08, 'sine', 0.06), 120); },
+                wrong() { this.play(300, 0.12, 'triangle', 0.05); },
+                guessCorrect() { this.play(400, 0.08, 'sine', 0.08);
+                    setTimeout(() => this.play(600, 0.08, 'sine', 0.08), 80);
+                    setTimeout(() => this.play(800, 0.08, 'sine', 0.08), 160);
+                    setTimeout(() => this.play(1000, 0.12, 'sine', 0.08), 240); },
+                confirm() { this.play(440, 0.06, 'sine', 0.06);
+                    setTimeout(() => this.play(660, 0.06, 'sine', 0.06), 60);
+                    setTimeout(() => this.play(880, 0.1, 'sine', 0.07), 120); },
+                move() { this.play(200, 0.03, 'sine', 0.03); },
+                paddle() { this.play(800, 0.04, 'triangle', 0.05); },
+                brick() { this.play(1200, 0.05, 'square', 0.06); },
+                pinballBounce() { this.play(400, 0.05, 'triangle', 0.05); },
+                startSnakeBgm(speedMs = 200) {
+                    this.stopSnakeBgm();
+                    this.ensureCtx();
+                    if (!this.ctx) return;
+                    try {
+                        this._bgmInterval = setInterval(() => {
+                            if (!this.ctx || this.ctx.state === 'closed') { this.stopSnakeBgm(); return; }
+                            try {
+                                const osc = this.ctx.createOscillator();
+                                const gain = this.ctx.createGain();
+                                osc.type = 'sine';
+                                osc.frequency.value = 110;
+                                gain.gain.setValueAtTime(0.03, this.ctx.currentTime);
+                                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.06);
+                                osc.connect(gain);
+                                gain.connect(this.ctx.destination);
+                                osc.start();
+                                osc.stop(this.ctx.currentTime + 0.07);
+                            } catch (e) {}
+                        }, speedMs);
+                    } catch (e) {}
+                },
+                stopSnakeBgm() {
+                    if (this._bgmInterval) { clearInterval(this._bgmInterval);
+                        this._bgmInterval = null; }
+                    if (this._bgmOsc) { try { this._bgmOsc.stop(); } catch (e) {} this._bgmOsc = null; }
+                    if (this._bgmGain) { this._bgmGain = null; }
+                },
+                updateSnakeBgmSpeed(speedMs) {
+                    if (this._bgmInterval) {
+                        clearInterval(this._bgmInterval);
+                        this._bgmInterval = setInterval(() => {
+                            if (!this.ctx || this.ctx.state === 'closed') { this.stopSnakeBgm(); return; }
+                            try {
+                                const osc = this.ctx.createOscillator();
+                                const gain = this.ctx.createGain();
+                                osc.type = 'sine';
+                                osc.frequency.value = 110;
+                                gain.gain.setValueAtTime(0.03, this.ctx.currentTime);
+                                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.06);
+                                osc.connect(gain);
+                                gain.connect(this.ctx.destination);
+                                osc.start();
+                                osc.stop(this.ctx.currentTime + 0.07);
+                            } catch (e) {}
+                        }, speedMs);
+                    }
+                },
+                startGuessBgm() {
+                    this.stopGuessBgm();
+                    this.ensureCtx();
+                    if (!this.ctx) return;
+                    try {
+                        this._guessBgmOsc = this.ctx.createOscillator();
+                        this._guessBgmGain = this.ctx.createGain();
+                        this._guessBgmOsc.type = 'sine';
+                        this._guessBgmOsc.frequency.value = 80;
+                        this._guessBgmGain.gain.setValueAtTime(0.02, this.ctx.currentTime);
+                        this._guessBgmOsc.connect(this._guessBgmGain);
+                        this._guessBgmGain.connect(this.ctx.destination);
+                        this._guessBgmOsc.start();
+
+                        this._guessBgwOsc2 = this.ctx.createOscillator();
+                        this._guessBgwGain2 = this.ctx.createGain();
+                        this._guessBgwOsc2.type = 'sine';
+                        this._guessBgwOsc2.frequency.value = 120;
+                        this._guessBgwGain2.gain.setValueAtTime(0.015, this.ctx.currentTime);
+                        this._guessBgwOsc2.connect(this._guessBgwGain2);
+                        this._guessBgwGain2.connect(this.ctx.destination);
+                        this._guessBgwOsc2.start();
+                    } catch (e) {}
+                },
+                stopGuessBgm() {
+                    if (this._guessBgmOsc) { try { this._guessBgmOsc.stop(); } catch (e) {} this._guessBgmOsc = null; }
+                    if (this._guessBgmGain) { this._guessBgmGain = null; }
+                    if (this._guessBgwOsc2) { try { this._guessBgwOsc2.stop(); } catch (e) {} this._guessBgwOsc2 =
+                        null; }
+                    if (this._guessBgwGain2) { this._guessBgwGain2 = null; }
+                },
+                stopAllBgm() {
+                    this.stopSnakeBgm();
+                    this.stopGuessBgm();
+                }
+            };
+
+            document.addEventListener('click', () => SoundFX.ensureCtx(), { once: true });
+            document.addEventListener('touchstart', () => SoundFX.ensureCtx(), { once: true });
+            document.addEventListener('keydown', () => SoundFX.ensureCtx(), { once: true });
+
+            // ========== SVG图标库 ==========
+            const ICON_SVGS = {
+                '🍖': () =>
+                    `<svg viewBox="0 0 64 64"><rect x="14" y="26" width="36" height="20" rx="8" fill="#c0392b"/><ellipse cx="32" cy="36" rx="10" ry="6" fill="#e74c3c"/><circle cx="22" cy="30" r="3" fill="#f1c40f"/><circle cx="42" cy="30" r="3" fill="#f1c40f"/><path d="M18 20 Q32 8 46 20" stroke="#f39c12" stroke-width="3" fill="none"><animate attributeName="d" values="M18 20 Q32 8 46 20;M18 18 Q32 6 46 18;M18 20 Q32 8 46 20" dur="2s" repeatCount="indefinite"/></path></svg>`,
+                '🦴': () =>
+                    `<svg viewBox="0 0 64 64"><g transform="rotate(-15 32 32)"><rect x="20" y="26" width="24" height="12" rx="4" fill="#8e44ad"/><circle cx="20" cy="32" r="10" fill="#9b59b6"/><circle cx="44" cy="32" r="10" fill="#9b59b6"/><animateTransform attributeName="transform" type="rotate" values="-15 32 32;-10 32 32;-15 32 32" dur="3s" repeatCount="indefinite"/></g></svg>`,
+                '🍗': () =>
+                    `<svg viewBox="0 0 64 64"><ellipse cx="32" cy="36" rx="14" ry="18" fill="#d35400"/><ellipse cx="32" cy="36" rx="10" ry="14" fill="#e67e22"/><line x1="32" y1="22" x2="32" y2="12" stroke="#f39c12" stroke-width="4"><animate attributeName="y2" values="12;16;12" dur="1.5s" repeatCount="indefinite"/></line><circle cx="32" cy="12" r="4" fill="#f1c40f"><animate attributeName="cy" values="12;16;12" dur="1.5s" repeatCount="indefinite"/></circle></svg>`,
+                '🫘': () =>
+                    `<svg viewBox="0 0 64 64"><rect x="8" y="20" width="48" height="24" rx="6" fill="#95a5a6"/><circle cx="22" cy="32" r="6" fill="#e74c3c"><animate attributeName="cy" values="32;36;32" dur="1.2s" repeatCount="indefinite"/></circle><circle cx="42" cy="32" r="6" fill="#2ecc71"><animate attributeName="cy" values="32;28;32" dur="1.5s" repeatCount="indefinite"/></circle></svg>`,
+                '🍅': () =>
+                    `<svg viewBox="0 0 64 64"><circle cx="32" cy="36" r="16" fill="#e74c3c"><animate attributeName="r" values="16;18;16" dur="2s" repeatCount="indefinite"/></circle><path d="M28 22 Q32 12 36 22" stroke="#27ae60" stroke-width="3" fill="none"><animate attributeName="d" values="M28 22 Q32 12 36 22;M28 24 Q32 14 36 24;M28 22 Q32 12 36 22" dur="2.5s" repeatCount="indefinite"/></path></svg>`,
+                '🥔': () =>
+                    `<svg viewBox="0 0 64 64"><ellipse cx="32" cy="34" rx="16" ry="12" fill="#d4ac0d"/><ellipse cx="32" cy="34" rx="13" ry="10" fill="#f1c40f"/><circle cx="24" cy="30" r="2" fill="#b7950b"/><circle cx="36" cy="36" r="2" fill="#b7950b"/><animateTransform attributeName="transform" type="rotate" values="0 32 34;5 32 34;0 32 34;-5 32 34;0 32 34" dur="4s" repeatCount="indefinite"/></svg>`,
+                '🍚': () =>
+                    `<svg viewBox="0 0 64 64"><ellipse cx="32" cy="40" rx="18" ry="8" fill="#ecf0f1"/><path d="M14 40 Q32 12 50 40" fill="#fdfefe" stroke="#bdc3c7" stroke-width="1.5"><animate attributeName="d" values="M14 40 Q32 12 50 40;M14 40 Q32 16 50 40;M14 40 Q32 12 50 40" dur="3s" repeatCount="indefinite"/></path></svg>`,
+                '🍲': () =>
+                    `<svg viewBox="0 0 64 64"><path d="M12 40 Q12 24 32 20 Q52 24 52 40 Z" fill="#e67e22"/><ellipse cx="32" cy="36" rx="14" ry="6" fill="#f39c12" opacity="0.8"/><path d="M18 34 Q22 28 32 32 Q42 36 46 34" stroke="#fff" stroke-width="1.5" fill="none" opacity="0.6"><animate attributeName="opacity" values="0.6;0.2;0.6" dur="1.5s" repeatCount="indefinite"/></path></svg>`
+            };
+
+            function createGenericIconSVG(emoji) {
+                const safeEmoji = escapeHtml(emoji);
+                return `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#fdf6f0" stroke="#e0d6c8" stroke-width="2"><animate attributeName="r" values="28;30;28" dur="2.5s" repeatCount="indefinite"/></circle><text x="32" y="42" font-size="26" text-anchor="middle" dominant-baseline="middle" fill="#3d3029">${safeEmoji}</text></svg>`;
+            }
+
+            function getDishIconHTML(e) { const s = e || '🍽️'; return ICON_SVGS[s] ? `<div class="dish-icon-wrap">${ICON_SVGS[s]()}</div>` : `<div class="dish-icon-wrap">${createGenericIconSVG(s)}</div>`; }
+
+            function getCartItemIconHTML(e) { const s = e || '🍽️'; return ICON_SVGS[s] ? `<div class="cart-item-icon">${ICON_SVGS[s]()}</div>` : `<div class="cart-item-icon">${createGenericIconSVG(s)}</div>`; }
+
+            function getOrderItemIconHTML(e) { const s = e || '🍽️'; return ICON_SVGS[s] ? `<div class="order-item-icon">${ICON_SVGS[s]()}</div>` : `<div class="order-item-icon">${createGenericIconSVG(s)}</div>`; }
+
+            const escapeHtml = t => { const m = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }; return String(
+                    t).replace(/[&<>"']/g, c => m[c]); };
+            const STORAGE = { MENU: 'menu_v17', CART: 'cart_v14', NICK: 'nickname_v4', ROOM: 'currentRoom_v4',
+                SHARED: 'shared_local_v5_', SNAKE_HIGH: 'snake_high_v3', BREAKOUT_HIGH: 'breakout_high_v3' };
+
+            // 原有30道精品菜品（带详细教程）
+            const CORE_DISHES = [
+                { id: 1, name: '红烧肉', price: 38, category: '荤菜', emoji: '🍖', desc: '肥而不腻', video: '',
+                    tutorial: '【红烧肉】\n1. 五花肉切3cm方块，冷水下锅焯水去血沫，捞出沥干。\n2. 锅中少油，加冰糖小火炒出糖色（琥珀色）。\n3. 放入肉块翻炒上色，加葱姜、八角、桂皮。\n4. 加料酒、生抽、老抽，倒入开水没过肉。\n5. 大火烧开转小火炖40-50分钟，收汁至浓稠即可。\n💡 关键：炒糖色火候要小，炖煮时间要足。' },
+                { id: 2, name: '糖醋排骨', price: 42, category: '荤菜', emoji: '🦴', desc: '酸甜可口', video: '',
+                    tutorial: '【糖醋排骨】\n1. 排骨剁小段焯水，加料酒姜片去腥。\n2. 热油炸至金黄捞出。\n3. 调糖醋汁：白糖+醋+生抽+番茄酱+水（比例3:2:1:1:3）。\n4. 锅中留底油，倒入糖醋汁熬至粘稠。\n5. 放入排骨快速翻炒均匀，撒白芝麻出锅。\n💡 关键：糖醋比例要平衡，最后大火收汁。' },
+                { id: 3, name: '宫保鸡丁', price: 28, category: '荤菜', emoji: '🍗', desc: '麻辣鲜香', video: '',
+                    tutorial: '【宫保鸡丁】\n1. 鸡胸肉切丁，加盐、淀粉、料酒腌制15分钟。\n2. 花生米小火炒香备用。\n3. 调碗汁：生抽+醋+糖+淀粉+水。\n4. 热油爆香花椒、干辣椒，放入鸡丁滑炒至变色。\n5. 倒入碗汁翻炒，加花生米、葱段翻匀出锅。\n💡 关键：鸡丁要嫩，花生要脆，麻辣适中。' },
+                { id: 4, name: '麻婆豆腐', price: 22, category: '素菜', emoji: '🫘', desc: '下饭神器', video: '',
+                    tutorial: '【麻婆豆腐】\n1. 嫩豆腐切2cm方块，盐水浸泡10分钟。\n2. 牛肉末炒香备用。\n3. 热油加郫县豆瓣酱炒出红油，加姜蒜末。\n4. 加高汤或水，放入豆腐轻轻推匀。\n5. 加花椒粉、牛肉末，水淀粉勾芡，撒葱花。\n💡 关键：豆腐要嫩不碎，豆瓣酱要炒香。' },
+                { id: 5, name: '西红柿炒鸡蛋', price: 18, category: '素菜', emoji: '🍅', desc: '营养美味', video: '',
+                    tutorial: '【西红柿炒鸡蛋】\n1. 鸡蛋打散加少许盐，西红柿切块。\n2. 热油炒鸡蛋至凝固盛出。\n3. 锅中加油炒西红柿至出汁。\n4. 加少许糖提鲜，倒回鸡蛋翻炒。\n5. 加盐调味，撒葱花出锅。\n💡 关键：鸡蛋先炒嫩，西红柿要炒出汁。' },
+                { id: 6, name: '酸辣土豆丝', price: 16, category: '素菜', emoji: '🥔', desc: '爽脆酸辣', video: '',
+                    tutorial: '【酸辣土豆丝】\n1. 土豆去皮切细丝，清水浸泡去淀粉。\n2. 干辣椒剪段，蒜切片。\n3. 热油爆香辣椒和蒜。\n4. 放入沥干的土豆丝大火快炒。\n5. 加醋、盐调味，翻炒1-2分钟出锅。\n💡 关键：土豆丝要细且均匀，全程大火快炒保持脆爽。' },
+                { id: 7, name: '米饭', price: 2, category: '主食', emoji: '🍚', desc: '香喷喷', video: '',
+                    tutorial: '【蒸米饭】\n1. 大米淘洗2-3遍，不要过度搓洗。\n2. 米水比例约1:1.2（手指插入触到米，水面到第一关节）。\n3. 浸泡15-20分钟后开始蒸煮。\n4. 电饭煲跳闸后焖5-10分钟。\n5. 用饭勺打散即可。\n💡 关键：浸泡让米粒充分吸水，口感更佳。' },
+                { id: 8, name: '紫菜蛋花汤', price: 12, category: '汤品', emoji: '🍲', desc: '鲜美', video: '',
+                    tutorial: '【紫菜蛋花汤】\n1. 紫菜撕碎，鸡蛋打散备用。\n2. 锅中加水烧开，加少许盐和鸡精。\n3. 放入紫菜煮1分钟。\n4. 转小火，沿筷子缓缓倒入蛋液形成蛋花。\n5. 淋香油，撒葱花即可。\n💡 关键：倒蛋液时火要小，蛋花才漂亮。' },
+                { id: 9, name: '回锅肉', price: 35, category: '荤菜', emoji: '🥩', desc: '经典川味', video: '',
+                    tutorial: '【回锅肉】\n1. 五花肉整块煮至八成熟，切薄片。\n2. 青蒜切段，豆瓣酱剁细。\n3. 热锅少油，肉片煸炒至卷曲出油。\n4. 加豆瓣酱炒出红油，加甜面酱。\n5. 放入青蒜翻炒断生即可。\n💡 关键：肉片要薄，煸炒要出油卷曲。' },
+                { id: 10, name: '鱼香肉丝', price: 32, category: '荤菜', emoji: '🐟', desc: '酸甜微辣', video: '',
+                    tutorial: '【鱼香肉丝】\n1. 猪里脊切丝，加盐、淀粉腌制。\n2. 木耳、胡萝卜、青椒切丝。\n3. 调鱼香汁：生抽+醋+糖+淀粉+水。\n4. 热油滑炒肉丝变色盛出。\n5. 炒香豆瓣酱，加配菜和肉丝，倒鱼香汁翻匀。\n💡 关键：鱼香味型是酸甜微辣，糖醋比例要恰当。' },
+                { id: 11, name: '京酱肉丝', price: 36, category: '荤菜', emoji: '🥢', desc: '酱香浓郁', video: '',
+                    tutorial: '【京酱肉丝】\n1. 猪里脊切丝，加蛋清、淀粉上浆。\n2. 甜面酱加糖、水调稀。\n3. 热油滑炒肉丝至变白盛出。\n4. 锅中炒香甜面酱。\n5. 放入肉丝翻炒裹匀酱汁，配葱丝、豆腐皮食用。\n💡 关键：酱要炒香，肉丝要嫩滑。' },
+                { id: 12, name: '木须肉', price: 30, category: '荤菜', emoji: '🍳', desc: '家常小炒', video: '',
+                    tutorial: '【木须肉】\n1. 猪里脊切片，加料酒、淀粉腌制。\n2. 鸡蛋炒熟盛出，木耳黄花菜泡发。\n3. 热油炒肉片至变色。\n4. 加木耳黄花菜翻炒。\n5. 倒回鸡蛋，加盐、生抽调味。\n💡 关键：食材丰富，色彩搭配好看。' },
+                { id: 13, name: '椒盐里脊', price: 40, category: '荤菜', emoji: '🧂', desc: '外酥里嫩', video: '',
+                    tutorial: '【椒盐里脊】\n1. 猪里脊切条，加盐、料酒腌制。\n2. 调面糊：面粉+淀粉+鸡蛋+水。\n3. 肉条裹面糊，六成热油炸至金黄。\n4. 捞出复炸一次更酥脆。\n5. 撒椒盐粉（花椒粉+盐）拌匀。\n💡 关键：复炸是酥脆的秘诀，椒盐要现调。' },
+                { id: 14, name: '可乐鸡翅', price: 34, category: '荤菜', emoji: '🍗', desc: '甜香入味', video: '',
+                    tutorial: '【可乐鸡翅】\n1. 鸡翅洗净，两面划刀。\n2. 冷水焯水去血沫。\n3. 热油煎至两面金黄。\n4. 倒入可乐（没过鸡翅），加生抽、姜片。\n5. 大火烧开转小火炖20分钟，收汁即可。\n💡 关键：可乐本身有甜度，无需额外加糖。' },
+                { id: 15, name: '红烧鸡块', price: 33, category: '荤菜', emoji: '🐔', desc: '鸡肉鲜嫩', video: '',
+                    tutorial: '【红烧鸡块】\n1. 鸡腿剁块焯水。\n2. 热油炒糖色，加鸡块翻炒。\n3. 加葱姜蒜、八角、料酒、生抽、老抽。\n4. 加水没过鸡块，大火烧开转小火炖30分钟。\n5. 加盐调味，收汁出锅。\n💡 关键：鸡肉先焯水去腥，炖煮时间要够。' },
+                { id: 16, name: '葱爆羊肉', price: 45, category: '荤菜', emoji: '🐑', desc: '葱香四溢', video: '',
+                    tutorial: '【葱爆羊肉】\n1. 羊肉切薄片，加料酒、生抽、淀粉腌制。\n2. 大葱斜切段。\n3. 热油大火爆炒羊肉至变色。\n4. 放入大葱快速翻炒。\n5. 加盐、孜然调味，30秒出锅。\n💡 关键：全程大火快炒，羊肉嫩葱香。' },
+                { id: 17, name: '孜然牛肉', price: 48, category: '荤菜', emoji: '🐮', desc: '烧烤风味', video: '',
+                    tutorial: '【孜然牛肉】\n1. 牛肉逆纹切薄片。\n2. 加料酒、生抽、淀粉腌制20分钟。\n3. 热油滑炒牛肉至变色。\n4. 加孜然粉、辣椒粉、盐。\n5. 大火翻炒均匀，撒白芝麻。\n💡 关键：牛肉要逆纹切才嫩，孜然要足量。' },
+                { id: 18, name: '干煸豆角', price: 20, category: '素菜', emoji: '🫛', desc: '咸鲜微辣', video: '',
+                    tutorial: '【干煸豆角】\n1. 豆角去筋掰段，沥干水分。\n2. 热油煸炒豆角至表皮起皱。\n3. 盛出豆角，留底油。\n4. 爆香干辣椒、花椒、蒜末。\n5. 倒回豆角，加盐、生抽翻炒。\n💡 关键：豆角一定要煸熟煸透，生豆角有毒。' },
+                { id: 19, name: '地三鲜', price: 24, category: '素菜', emoji: '🍆', desc: '东北名菜', video: '',
+                    tutorial: '【地三鲜】\n1. 土豆、茄子切滚刀块，青椒切片。\n2. 分别过油炸至金黄。\n3. 调碗汁：生抽+糖+淀粉+水。\n4. 锅中爆香蒜末，加所有食材。\n5. 倒入碗汁快速翻炒均匀。\n💡 关键：茄子吸油，可先拍淀粉再炸。' },
+                { id: 20, name: '手撕包菜', price: 18, category: '素菜', emoji: '🥬', desc: '酸辣爽脆', video: '',
+                    tutorial: '【手撕包菜】\n1. 包菜手撕成片（不用刀切）。\n2. 干辣椒剪段，蒜切片。\n3. 热油爆香辣椒蒜片。\n4. 放入包菜大火快炒。\n5. 加醋、盐、生抽，炒至断生。\n💡 关键：手撕比刀切更好吃，大火快炒保持脆爽。' },
+                { id: 21, name: '蒜蓉西兰花', price: 22, category: '素菜', emoji: '🥦', desc: '清淡健康', video: '',
+                    tutorial: '【蒜蓉西兰花】\n1. 西兰花掰小朵，盐水浸泡洗净。\n2. 沸水加盐焯烫1分钟捞出。\n3. 蒜切末（多些）。\n4. 热油炒香蒜末。\n5. 放入西兰花翻炒，加盐调味。\n💡 关键：焯水时间不宜长，保持翠绿色泽。' },
+                { id: 22, name: '蚝油生菜', price: 16, category: '素菜', emoji: '🥬', desc: '简单快手', video: '',
+                    tutorial: '【蚝油生菜】\n1. 生菜洗净掰开。\n2. 沸水焯烫10秒捞出摆盘。\n3. 调蚝油汁：蚝油+生抽+糖+水+淀粉。\n4. 锅中煮至粘稠。\n5. 浇在生菜上即可。\n💡 关键：生菜焯水要快，保持脆嫩。' },
+                { id: 23, name: '家常豆腐', price: 20, category: '素菜', emoji: '🧈', desc: '软嫩鲜香', video: '',
+                    tutorial: '【家常豆腐】\n1. 老豆腐切三角块。\n2. 热油煎至两面金黄。\n3. 木耳、青椒切片。\n4. 锅中炒香豆瓣酱，加配菜。\n5. 放入豆腐，加水焖煮入味。\n💡 关键：豆腐先煎定型，焖煮让味道渗入。' },
+                { id: 24, name: '红烧茄子', price: 22, category: '素菜', emoji: '🍆', desc: '软烂入味', video: '',
+                    tutorial: '【红烧茄子】\n1. 茄子切滚刀块，撒盐腌制出水。\n2. 挤干水分，拍淀粉。\n3. 热油炸至金黄。\n4. 调汁：生抽+糖+醋+淀粉+水。\n5. 锅中爆香蒜末，加茄子和汁翻炒。\n💡 关键：腌茄子去涩味，炸后不吸油。' },
+                { id: 25, name: '虎皮青椒', price: 18, category: '素菜', emoji: '🫑', desc: '下饭神器', video: '',
+                    tutorial: '【虎皮青椒】\n1. 青椒去籽拍扁。\n2. 干锅（不放油）煸至表皮焦黄。\n3. 加油、蒜末炒香。\n4. 加生抽、醋、糖调味。\n5. 翻炒均匀出锅。\n💡 关键：先干煸出虎皮纹，再加调料。' },
+                { id: 26, name: '醋溜白菜', price: 14, category: '素菜', emoji: '🥬', desc: '酸爽开胃', video: '',
+                    tutorial: '【醋溜白菜】\n1. 白菜帮和叶分开，帮斜切片。\n2. 干辣椒剪段。\n3. 热油爆香辣椒。\n4. 先炒白菜帮，再放叶子。\n5. 加醋、盐、糖，大火快炒。\n💡 关键：醋要最后加，保持酸味。' },
+                { id: 27, name: '韭菜炒蛋', price: 17, category: '素菜', emoji: '🥚', desc: '简单美味', video: '',
+                    tutorial: '【韭菜炒蛋】\n1. 韭菜洗净切段。\n2. 鸡蛋打散加盐。\n3. 热油炒鸡蛋盛出。\n4. 锅中炒韭菜至变色。\n5. 倒回鸡蛋翻炒均匀。\n💡 关键：韭菜易熟，炒制时间要短。' },
+                { id: 28, name: '番茄菜花', price: 19, category: '素菜', emoji: '🥦', desc: '酸甜可口', video: '',
+                    tutorial: '【番茄菜花】\n1. 菜花掰小朵焯水。\n2. 番茄去皮切块。\n3. 热油炒番茄出汁。\n4. 加菜花翻炒。\n5. 加盐、糖调味，焖2分钟。\n💡 关键：番茄要炒出汁，菜花焯水后更易熟。' },
+                { id: 29, name: '冬瓜排骨汤', price: 28, category: '汤品', emoji: '🍖', desc: '清淡滋补', video: '',
+                    tutorial: '【冬瓜排骨汤】\n1. 排骨焯水去血沫。\n2. 冬瓜去皮切块。\n3. 排骨加水、姜片大火烧开。\n4. 转小火炖40分钟。\n5. 加冬瓜再炖15分钟，加盐。\n💡 关键：排骨先炖烂，冬瓜后放保持形状。' },
+                { id: 30, name: '酸辣汤', price: 15, category: '汤品', emoji: '🥣', desc: '开胃暖身', video: '',
+                    tutorial: '【酸辣汤】\n1. 豆腐、木耳、火腿切丝。\n2. 高汤烧开，放入食材。\n3. 加醋、白胡椒粉、盐。\n4. 水淀粉勾芡。\n5. 淋蛋液成蛋花，加香油。\n💡 关键：醋和胡椒粉是灵魂，比例要恰当。' }
+            ];
+
+            // 生成额外90道菜品，确保总数为120，且每道都有tutorial和video字段
+            function generateExtraDishes(startId, count) {
+                const dishes = [];
+                const names = [
+                    '小炒肉', '辣子鸡', '水煮鱼', '酸菜鱼', '红烧带鱼', '糖醋里脊', '干炸丸子', '软炸虾仁', '葱烧海参', '油焖大虾',
+                    '蒜蓉粉丝虾', '清蒸鲈鱼', '剁椒鱼头', '酸辣鸡杂', '泡椒凤爪', '卤牛肉', '酱肘子', '烤羊排', '香辣蟹', '干锅牛蛙',
+                    '毛血旺', '夫妻肺片', '口水鸡', '棒棒鸡', '蒜泥白肉', '白切鸡', '盐水鸭', '酱板鸭', '烤鸭', '东坡肉',
+                    '梅菜扣肉', '粉蒸肉', '珍珠丸子', '四喜丸子', '红烧狮子头', '腐乳肉', '樱桃肉', '锅包肉', '溜肉段', '焦溜丸子',
+                    '木须柿子', '地瓜炖排骨', '土豆烧牛肉', '萝卜炖牛腩', '番茄牛腩', '咖喱鸡', '黄焖鸡', '三杯鸡', '啤酒鸭', '魔芋烧鸭',
+                    '干锅花菜', '干锅土豆片', '干锅千页豆腐', '香干炒肉', '芹菜香干', '韭菜香干', '腐竹炒肉', '木耳炒肉', '蒜苔炒肉', '豆角焖面',
+                    '炒河粉', '炒米粉', '蛋炒饭', '扬州炒饭', '菠萝炒饭', '煲仔饭', '腊味合蒸', '蒸水蛋', '虾仁蒸蛋', '蛤蜊蒸蛋',
+                    '紫菜汤', '西红柿蛋汤', '豆腐汤', '酸辣汤', '菌菇汤', '排骨汤', '鸡汤', '老鸭汤', '银耳汤', '绿豆汤',
+                    '拍黄瓜', '凉拌木耳', '皮蛋豆腐', '凉拌三丝', '老虎菜', '果仁菠菜', '凉拌藕片', '凉拌海带丝', '口水茄子', '脆皮豆腐'
+                ];
+                const categories = ['荤菜', '素菜', '汤品', '主食', '凉菜', '小吃', '饮品', '其他'];
+                const emojis = ['🍖', '🍗', '🥩', '🦴', '🐟', '🍤', '🥬', '🥦', '🍆', '🌶️', '🧄', '🥚', '🍚', '🍜', '🥘', '🍲', '🥗', '🥩', '🍢', '🥠'];
+
+                for (let i = 0; i < count; i++) {
+                    const idx = i % names.length;
+                    const name = names[idx] + (Math.floor(i / names.length) > 0 ? `(${Math.floor(i/names.length)+1})` : '');
+                    const price = parseFloat((5 + Math.random() * 60).toFixed(2));
+                    const cat = categories[Math.floor(Math.random() * categories.length)];
+                    const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+                    dishes.push({
+                        id: startId + i,
+                        name,
+                        price,
+                        category: cat,
+                        emoji,
+                        desc: '',
+                        video: '',
+                        tutorial: '暂无教程，请在管理页面编辑。'
+                    });
+                }
+                return dishes;
+            }
+
+            const FOOD_EMOJIS = ['🍖', '🍗', '🥩', '🦴', '🐟', '🍤', '🫘', '🍅', '🥔', '🥬', '🍲', '🥘', '🍚', '🥟', '🍳', '🧈',
+                '🍜', '🥗', '🍆', '🥦', '🫑', '🥒', '🍄', '🌽', '🐔', '🐮', '🐑', '🦆', '🦐', '🐚', '🥢', '🧂', '🫛', '🥣',
+                '🍝', '🥐', '🫓', '🌶️', '🥓', '🪷', '🫐', '🧆', '🌱', '🦀', '🍛', '🎃', '🫔', '🍢', '🥛', '🍡', '🍧', '🧋',
+                '🍉', '🍊', '🍮', '🥙', '🌿', '🪸'
+            ];
+
+            // ========== Gun.js ==========
+            let gun = null,
+                useGun = false,
+                gunReady = false,
+                gunAttempts = 0;
+
+            function initGun() {
+                if (typeof Gun === 'undefined') { updateConnStatus('local'); return; }
+                try {
+                    gun = Gun({ localStorage: true, radisk: true, axe: true });
+                    useGun = true;
+                    gunReady = true;
+                    updateConnStatus('connecting');
+                    setTimeout(() => checkGunConn(), 2000);
+                    setTimeout(() => checkGunConn(), 5000);
+                } catch (e) { updateConnStatus('local'); }
+            }
+
+            function checkGunConn() {
+                if (!useGun || !gun) { updateConnStatus('local'); return; }
+                try {
+                    gun.get('conn-tests').get('_' + userId).put({ ts: Date.now() }, ack => {
+                        if (ack && ack.ok) { gunAttempts = 0;
+                            updateConnStatus('online'); } else { gunAttempts++; if (gunAttempts >=
+                                3) updateConnStatus('local'); }
+                    });
+                } catch (e) { updateConnStatus('local'); }
+            }
+
+            function updateConnStatus(s) {
+                const dot = document.getElementById('connectionDot'),
+                    txt = document.getElementById('connectionText'),
+                    bar = document.getElementById('syncStatusBar'),
+                    icn = document.getElementById('syncStatusIcon'),
+                    stxt = document.getElementById('syncStatusText');
+                dot.classList.remove('connected', 'syncing');
+                if (s === 'online') { dot.classList.add('connected');
+                    txt.textContent = '已同步'; if (bar) { bar.className = 'sync-status-bar online';
+                        icn.textContent = '🟢';
+                        stxt.textContent = '在线同步 - 数据可在设备间共享'; } } else if (s === 'connecting') { dot.classList.add(
+                        'syncing');
+                    txt.textContent = '连接中...'; if (bar) { bar.className = 'sync-status-bar connecting';
+                        icn.textContent = '🟡';
+                        stxt.textContent = '正在建立连接...'; } } else { txt.textContent = '本地模式'; if (bar) { bar.className =
+                            'sync-status-bar local';
+                        icn.textContent = '📡';
+                        stxt.textContent = '本地模式 - 数据仅存储在此设备'; } }
+            }
+            initGun();
+
+            const userId = 'u_' + Math.random().toString(36).substr(2, 8);
+            let currentRoom = '家常菜',
+                sharedOrders = {},
+                menuData = [],
+                cartData = [],
+                nickname = '';
+            const historyOrderIds = new Set();
+
+            const roomInput = document.getElementById('roomInput'),
+                displayRoomName = document.getElementById('displayRoomName');
+            const sharedOrdersList = document.getElementById('sharedOrdersList'),
+                historyList = document.getElementById('historyList'),
+                historySection = document.getElementById('historySection'),
+                sharedSummary = document.getElementById('sharedSummary'),
+                sharedTotalPrice = document.getElementById('sharedTotalPrice'),
+                sharedTotalItems = document.getElementById('sharedTotalItems'),
+                cartBadge = document.getElementById('cartBadge'),
+                searchInput = document.getElementById('searchInput'),
+                btnClearSearch = document.getElementById('btnClearSearch'),
+                btnSetNick = document.getElementById('btnSetNick'),
+                btnRefreshShared = document.getElementById('btnRefreshShared'),
+                btnConfirmAll = document.getElementById('btnConfirmAll');
+
+            function loadMenu() {
+                const s = localStorage.getItem(STORAGE.MENU);
+                if (s) {
+                    try {
+                        menuData = JSON.parse(s);
+                        if (Array.isArray(menuData) && menuData.length) {
+                            for (let d of menuData) {
+                                if (!d.tutorial) d.tutorial = '暂无教程，请在管理页面编辑。';
+                                if (d.video === undefined) d.video = '';
+                            }
+                            return;
+                        }
+                    } catch (e) {}
+                }
+                const coreDup = JSON.parse(JSON.stringify(CORE_DISHES));
+                const extra = generateExtraDishes(31, 90);
+                menuData = coreDup.concat(extra);
+                saveMenu();
+            }
+
+            function saveMenu() { localStorage.setItem(STORAGE.MENU, JSON.stringify(menuData)); }
+
+            function loadCart() { const s = localStorage.getItem(STORAGE.CART);
+                cartData = s ? JSON.parse(s) : []; }
+
+            function saveCart() { localStorage.setItem(STORAGE.CART, JSON.stringify(cartData)); }
+
+            function loadNickname() { nickname = localStorage.getItem(STORAGE.NICK) || '';
+                updateNickBtn(); }
+
+            function saveNickname() { localStorage.setItem(STORAGE.NICK, nickname);
+                updateNickBtn(); }
+
+            function loadRoom() { currentRoom = localStorage.getItem(STORAGE.ROOM) || '家常菜';
+                roomInput.value = currentRoom;
+                displayRoomName.textContent = currentRoom; }
+
+            function saveRoom() { localStorage.setItem(STORAGE.ROOM, currentRoom); }
+
+            function syncCartMenu() { const ids = new Set(menuData.map(d => d.id));
+                cartData = cartData.filter(c => ids.has(c.id));
+                cartData.forEach(c => { const d = menuData.find(m => m.id === c.id); if (d) { c.name = d.name;
+                        c.price = d.price;
+                        c.emoji = d.emoji; } });
+                saveCart(); }
+
+            function updateNickBtn() { if (nickname && nickname.trim()) { btnSetNick.textContent = '👤 ' + nickname.trim()
+                        .substring(0, 8);
+                    btnSetNick.classList.add('has-nick'); } else { btnSetNick.textContent = '👤 昵称';
+                    btnSetNick.classList.remove('has-nick'); } }
+
+            function getHistoryKey(r) { return 'orderHist_v10_' + r; }
+
+            function getHistory(r) { try { return JSON.parse(localStorage.getItem(getHistoryKey(r)) || '[]'); } catch (
+                e) { return []; } }
+
+            function addToHistory(r, o) { const h = getHistory(r); if (!h.some(it => it.id === o.id) && !historyOrderIds.has(
+                        o.id)) { historyOrderIds.add(o.id);
+                    h.push(o); if (h.length > 200) h.splice(0, h.length - 200);
+                    localStorage.setItem(getHistoryKey(r), JSON.stringify(h)); } }
+
+            function clearHistory(r) { localStorage.removeItem(getHistoryKey(r));
+                historyOrderIds.clear(); }
+
+            function initHistoryIds(r) { const h = getHistory(r);
+                h.forEach(o => historyOrderIds.add(o.id)); }
+
+            function getLocalSharedKey() { return STORAGE.SHARED + currentRoom; }
+
+            function loadLocalShared() { try { return JSON.parse(localStorage.getItem(getLocalSharedKey()) || '{}'); } catch (
+                e) { return {}; } }
+
+            function saveLocalShared(o) { localStorage.setItem(getLocalSharedKey(), JSON.stringify(o)); }
+
+            function syncToGun(oid, data) { if (useGun && gun && gunReady) try { gun.get('sov10-' + currentRoom).get(oid).put(
+                        data); } catch (e) {} }
+
+            function delFromGun(oid) { if (useGun && gun && gunReady) try { gun.get('sov10-' + currentRoom).get(oid).put(
+                    null); } catch (e) {} }
+
+            function subscribeShared() {
+                sharedOrders = loadLocalShared();
+                if (useGun && gun && gunReady) { try { const p = 'sov10-' + currentRoom;
+                        gun.get(p).on(function(d, k) { if (!d) { if (k && sharedOrders[k]) { delete sharedOrders[
+                                    k];
+                                saveLocalShared(sharedOrders); if (document.getElementById('page-shared')
+                                    .classList.contains('active')) renderSharedOrders(); } } else if (k && d
+                                .dishId) { const loc = sharedOrders[k]; const newer = !loc || (d.timestamp && loc
+                                    .timestamp && d.timestamp > loc.timestamp) || d.confirmed; if (
+                                newer) { sharedOrders[k] = { id: k, ...d };
+                                saveLocalShared(sharedOrders); if (d.confirmed === true) addToHistory(
+                                    currentRoom, { id: k, ...d, room: currentRoom }); if (document
+                                    .getElementById('page-shared').classList.contains(
+                                        'active')) renderSharedOrders(); } }
+                            updateConnStatus('online'); }, true);
+                    updateConnStatus('online'); } catch (e) { updateConnStatus('local'); } } else { updateConnStatus(
+                        'local'); }
+                renderSharedOrders();
+            }
+
+            function publishOrder(dish, qty, note = '') { const now = Date.now(); const ok = now.toString(36) + Math.random()
+                    .toString(36).substr(2, 6); const od = { dishId: dish.id, name: dish.name, emoji: dish.emoji || '🍽️',
+                        price: dish.price, quantity: qty, userId, userName: nickname || userId.substring(0, 6),
+                        timestamp: now, note, confirmed: false };
+                sharedOrders[ok] = { id: ok, ...od };
+                saveLocalShared(sharedOrders);
+                syncToGun(ok, od);
+                SoundFX.success();
+                showToast('📤 已共享「' + dish.name + '」x' + qty);
+                renderSharedOrders(); }
+
+            function confirmOrder(ok) { if (sharedOrders[ok]) { sharedOrders[ok].confirmed = true;
+                    sharedOrders[ok].confirmedAt = Date.now();
+                    saveLocalShared(sharedOrders);
+                    syncToGun(ok, { confirmed: true, confirmedAt: Date.now(), confirmedBy: userId });
+                    addToHistory(currentRoom, { ...sharedOrders[ok], room: currentRoom });
+                    SoundFX.confirm();
+                    renderSharedOrders();
+                    showToast('✅ 订单已确认'); } }
+
+            function confirmAllOrders() { const unconfirmed = Object.keys(sharedOrders).filter(k => !sharedOrders[k]
+                    .confirmed); if (unconfirmed.length === 0) { showToast('没有待确认的订单', 'warning'); return; }
+                unconfirmed.forEach(k => { sharedOrders[k].confirmed = true;
+                    sharedOrders[k].confirmedAt = Date.now();
+                    syncToGun(k, { confirmed: true, confirmedAt: Date.now(), confirmedBy: userId });
+                    addToHistory(currentRoom, { ...sharedOrders[k], room: currentRoom }); });
+                saveLocalShared(sharedOrders);
+                SoundFX.confirm();
+                showToast('✅ 已确认 ' + unconfirmed.length + ' 条订单');
+                renderSharedOrders(); }
+
+            function removeSharedOrder(oid) { if (sharedOrders[oid]) { delete sharedOrders[oid];
+                    saveLocalShared(sharedOrders);
+                    delFromGun(oid);
+                    SoundFX.click();
+                    showToast('已移除');
+                    renderSharedOrders(); } }
+
+            function clearMySharedOrders() { const tr = Object.keys(sharedOrders).filter(k => sharedOrders[k].userId ===
+                    userId);
+                tr.forEach(k => { delete sharedOrders[k];
+                    delFromGun(k); });
+                saveLocalShared(sharedOrders);
+                showToast('已清空我的记录');
+                renderSharedOrders(); }
+
+            function changeRoom(nr) { nr = nr.trim() || '家常菜'; if (nr === currentRoom) return;
+                currentRoom = nr;
+                saveRoom();
+                roomInput.value = currentRoom;
+                displayRoomName.textContent = currentRoom;
+                initHistoryIds(currentRoom);
+                subscribeShared(); if (document.getElementById('page-shared').classList.contains('active'))
+                renderSharedOrders();
+                showToast('已切换至「' + currentRoom + '」'); }
+            roomInput.addEventListener('change', () => changeRoom(roomInput.value));
+            document.getElementById('btnChangeRoom').addEventListener('click', () => changeRoom(roomInput.value));
+            btnSetNick.addEventListener('click', async () => { let sn = null; const r = await showModal('设置昵称',
+                    '输入你的昵称', [{ text: '取消', cls: 'btn-secondary' }, { text: '保存', cls: 'btn-primary',
+                        action: () => { const inp = document.getElementById('nickInput');
+                            sn = inp ? inp.value.trim().substring(0, 10) : ''; } }
+                    ], '<input type="text" id="nickInput" value="' + escapeHtml(nickname) +
+                    '" placeholder="输入昵称" maxlength="10" style="width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1.5px solid #ddd;">'); if (
+                    r === '保存' && sn !== null) { nickname = sn;
+                    saveNickname();
+                    showToast('昵称已保存：' + (nickname || '未设置')); } });
+            btnRefreshShared.addEventListener('click', () => { showToast('正在刷新...', 'info');
+                subscribeShared(); if (useGun && gun && gunReady) checkGunConn(); });
+            btnConfirmAll.addEventListener('click', () => confirmAllOrders());
+
+            // ========== 视频链接解析 ==========
+            function parseVideoUrl(url) {
+                if (!url || !url.trim()) return null;
+                url = url.trim();
+                let match = url.match(
+                    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+                if (match) return { type: 'youtube', id: match[1], embedUrl: 'https://www.youtube.com/embed/' + match[
+                        1] };
+                match = url.match(/bilibili\.com\/video\/(BV[a-zA-Z0-9]+)/);
+                if (match) return { type: 'bilibili', id: match[1], embedUrl: 'https://player.bilibili.com/player.html?bvid=' +
+                        match[1] + '&page=1' };
+                if (/\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(url)) return { type: 'direct', url: url };
+                if (/^https?:\/\//.test(url)) return { type: 'link', url: url };
+                return null;
+            }
+
+            function getVideoEmbedHTML(videoUrl) {
+                const parsed = parseVideoUrl(videoUrl);
+                if (!parsed) return '';
+                if (parsed.type === 'youtube' || parsed.type === 'bilibili') {
+                    return `<div class="tutorial-video-wrap"><iframe src="${escapeHtml(parsed.embedUrl)}" allowfullscreen allow="autoplay; encrypted-media" loading="lazy"></iframe></div>`;
+                }
+                if (parsed.type === 'direct') {
+                    return `<div class="tutorial-video-wrap"><video controls preload="metadata" src="${escapeHtml(parsed.url)}" style="position:absolute;top:0;left:0;width:100%;height:100%;border-radius:12px;">您的浏览器不支持视频播放</video></div>`;
+                }
+                if (parsed.type === 'link') {
+                    return `<div style="margin:12px 0;text-align:center;"><a href="${escapeHtml(parsed.url)}" target="_blank" rel="noopener" style="color:var(--primary);font-weight:600;text-decoration:underline;">🎬 点击查看视频教程</a></div>`;
+                }
+                return '';
+            }
+
+            // ========== 教程弹窗 ==========
+            function showTutorial(dishId) {
+                const dish = menuData.find(d => d.id === dishId);
+                if (!dish) return;
+                const tut = dish.tutorial || '暂无详细教程，请在管理页面编辑。';
+                const formattedTut = escapeHtml(tut).replace(/\n/g, '<br>');
+                const videoHtml = dish.video ? getVideoEmbedHTML(dish.video) : '';
+                const content =
+                    `<div style="text-align:center;margin-bottom:12px;">${getDishIconHTML(dish.emoji)}</div><h3 style="margin:8px 0;">📖 ${escapeHtml(dish.name)} 的教程</h3><p style="color:var(--text-light);font-size:0.85rem;">${escapeHtml(dish.category)} · ¥${dish.price.toFixed(2)}${dish.desc?' · '+escapeHtml(dish.desc):''}</p>${videoHtml}<div class="tutorial-content">${formattedTut}</div>`;
+                showModal('', content, [{ text: '关闭', cls: 'btn-secondary' }], '');
+                SoundFX.click();
+            }
+
+            // ========== 页面渲染 ==========
+            function renderOrderPage() { const cats = ['全部', ...new Set(menuData.map(d => d.category))];
+                document.getElementById('categoryFilter').innerHTML = cats.map((c, i) => '<button class="cat-btn' + (i ===
+                    0 ? ' active' : '') + '" data-cat="' + c + '">' + c + '</button>').join('');
+                document.querySelectorAll('.cat-btn').forEach(b => b.onclick = () => { document.querySelectorAll(
+                            '.cat-btn').forEach(x => x.classList.remove('active'));
+                    b.classList.add('active');
+                    applyFilters(); });
+                applyFilters(); }
+
+            function applyFilters() { const cat = document.querySelector('.cat-btn.active')?.dataset.cat; const fc = (cat ===
+                    '全部' || !cat) ? null : cat; const st = searchInput.value.trim().toLowerCase(); let list = menuData; if (
+                    fc) list = list.filter(d => d.category === fc); if (st) list = list.filter(d => d.name.toLowerCase()
+                    .includes(st));
+                renderDishGrid(list); }
+
+            function renderDishGrid(list) { const grid = document.getElementById('dishGrid'); if (!list.length) { grid
+                        .innerHTML =
+                        '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#aaa;">暂无菜品</div>'; return; }
+                window.__showTutorial = showTutorial;
+                grid.innerHTML = list.map(d => { const q = cartData.find(c => c.id === d.id)?.quantity || 0; const hasTut = d
+                        .tutorial && d.tutorial.trim() && d.tutorial !== '暂无教程，请在管理页面编辑。'; const hasVideo = d.video && d.video
+                        .trim(); const tutHint = hasTut ?
+                        '<span class="tutorial-hint">📖</span>' : ''; const videoHint = hasVideo ?
+                        '<span class="video-hint">🎬</span>' : ''; const ctrl = q >
+                        0 ? '<div class="card-cart-ctrl" onclick="event.stopPropagation();"><button class="btn-qty minus" data-id="' +
+                        d.id + '">−</button><span>' + q + '</span><button class="btn-qty plus" data-id="' + d.id +
+                        '">+</button></div>' :
+                        '<button class="btn-add-cart" data-id="' + d.id +
+                        '" onclick="event.stopPropagation();">🛒 加入</button>'; return (
+                        `<div class="dish-card" data-dish-id="${d.id}" onclick="window.__showTutorial(${d.id})">${tutHint}${videoHint}${getDishIconHTML(d.emoji)}<div class="dish-name">${escapeHtml(d.name)}</div><div class="dish-price">¥${d.price.toFixed(2)}</div>${ctrl}</div>`
+                        ); }).join('');
+                grid.querySelectorAll('.btn-add-cart').forEach(b => {
+                    b.onclick = function(e) { e.stopPropagation();
+                        SoundFX.click();
+                        addToCart(parseInt(this.dataset.id)); };
+                });
+                grid.querySelectorAll('.btn-qty.plus').forEach(b => {
+                    b.onclick = function(e) { e.stopPropagation();
+                        SoundFX.click();
+                        addToCart(parseInt(this.dataset.id)); };
+                });
+                grid.querySelectorAll('.btn-qty.minus').forEach(b => {
+                    b.onclick = function(e) { e.stopPropagation();
+                        SoundFX.click();
+                        removeOneFromCart(parseInt(this.dataset.id)); };
+                }); }
+
+            function addToCart(id) { const d = menuData.find(m => m.id === id); if (!d) return; const ex = cartData.find(c => c
+                    .id === id); if (ex) ex.quantity++; else cartData.push({ id: d.id, name: d.name, price: d.price,
+                    emoji: d.emoji, quantity: 1 });
+                saveCart();
+                updateCartBadge();
+                refreshView(); }
+
+            function removeOneFromCart(id) { const ex = cartData.find(c => c.id === id); if (!ex) return;
+                ex.quantity--; if (ex.quantity <= 0) cartData = cartData.filter(c => c.id !== id);
+                saveCart();
+                updateCartBadge();
+                refreshView(); }
+
+            function updateCartBadge() { const t = cartData.reduce((s, i) => s + i.quantity, 0);
+                cartBadge.textContent = t;
+                cartBadge.style.display = t > 0 ? 'inline-flex' : 'none'; }
+
+            function renderCartPage() { const ctr = document.getElementById('cartContent');
+                window.__showTutorial = showTutorial; if (!cartData.length) { ctr
+                        .innerHTML =
+                        '<div class="cart-empty-state"><div style="font-size:3rem;">🛒</div><h3>购物车空空</h3><p>去点菜页面逛逛吧~</p></div>'; return; }
+                let html = '<div class="cart-container">';
+                cartData.forEach(item => { const st = item.price * item.quantity;
+                    html +=
+                        `<div class="cart-item-card">${getCartItemIconHTML(item.emoji)}<div class="cart-item-info"><div class="ci-name" onclick="window.__showTutorial(${item.id})" title="点击查看教程">${escapeHtml(item.name)}</div><div class="ci-unit-price">单价 ¥${item.price.toFixed(2)}</div></div><div class="cart-item-qty"><button class="btn-qty minus" data-id="${item.id}">−</button><span class="qty-val">${item.quantity}</span><button class="btn-qty plus" data-id="${item.id}">+</button></div><div class="cart-item-subtotal">¥${st.toFixed(2)}</div><button class="cart-item-remove" data-id="${item.id}">✕</button></div>`; }); const
+                    total = cartData.reduce((s, i) => s + i.price * i.quantity, 0);
+                html += '</div><div class="cart-summary-bar"><div style="font-weight:700;font-size:1.1rem;">合计：<span style="color:var(--primary);">¥' +
+                    total.toFixed(2) +
+                    '</span></div><div style="display:flex;gap:8px;"><button id="btnClearCart" class="btn btn-secondary">🗑️ 清空</button><button id="btnCheckout" class="btn btn-primary">✅ 下单并共享</button></div></div>';
+                ctr.innerHTML = html;
+                ctr.querySelectorAll('.btn-qty.plus').forEach(b => b.onclick = () => { SoundFX.click();
+                    addToCart(parseInt(b.dataset.id)); });
+                ctr.querySelectorAll('.btn-qty.minus').forEach(b => b.onclick = () => { SoundFX.click();
+                    removeOneFromCart(parseInt(b.dataset.id)); });
+                ctr.querySelectorAll('.cart-item-remove').forEach(b => b.onclick = () => { const id = parseInt(b.dataset
+                        .id);
+                    cartData = cartData.filter(c => c.id !== id);
+                    saveCart();
+                    updateCartBadge();
+                    renderCartPage();
+                    SoundFX.click();
+                    showToast('已移除', 'warning'); });
+                document.getElementById('btnClearCart').onclick = async () => { if (await showModal('清空购物车', '确定清空？', [
+                        { text: '取消', cls: 'btn-secondary' }, { text: '清空',
+                        cls: 'btn-danger-outline' }
+                    ])) { cartData = [];
+                    saveCart();
+                    updateCartBadge();
+                    renderCartPage(); } };
+                document.getElementById('btnCheckout').onclick = async () => { let cn = ''; const tc = cartData.reduce(
+                        (s, i) => s + i.price * i.quantity, 0); const lh = cartData.map(i => escapeHtml(i.emoji ||
+                            '🍽️') + ' ' + escapeHtml(i.name) + ' x' + i.quantity).join('<br>'); const r = await showModal(
+                        '确认下单', lh + '<br><strong>总计 ¥' + tc.toFixed(2) + '</strong>', [{ text: '取消',
+                            cls: 'btn-secondary' }, { text: '确认下单', cls: 'btn-primary',
+                            action: () => { const n = document.getElementById('orderNote');
+                                cn = n ? n.value.trim().substring(0, 30) : ''; } }
+                    ], '<input type="text" id="orderNote" placeholder="备注" style="width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1.5px solid #ddd;">'); if (
+                        r === '确认下单') { cartData.forEach(item => { const dish = menuData.find(d => d.id ===
+                                item.id) || item;
+                            publishOrder(dish, item.quantity, cn); });
+                        cartData = [];
+                        saveCart();
+                        updateCartBadge();
+                        renderCartPage();
+                        showToast('🎉 已下单并共享');
+                        switchPage('shared'); } }; }
+
+            function renderSharedOrders() {
+                displayRoomName.textContent = currentRoom;
+                window.__showTutorial = showTutorial;
+                const orders = Object.values(sharedOrders).sort((a, b) => b.timestamp - a.timestamp);
+                if (orders.length === 0) { sharedOrdersList.innerHTML =
+                        '<div style="text-align:center;color:#aaa;padding:30px;">暂无共享订单</div>';
+                    sharedSummary.style.display = 'none';
+                    btnConfirmAll.style.display = 'none'; } else {
+                    const groups = {};
+                    const now = new Date();
+                    const todayStr = now.toDateString();
+                    const yesterdayStr = new Date(now - 86400000).toDateString();
+                    orders.forEach(o => { const d = new Date(o.timestamp); const ds = d.toDateString(); let gk; if (
+                            ds === todayStr) gk = '今天'; else if (ds === yesterdayStr) gk = '昨天'; else gk = d
+                            .toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }); if (
+                            !groups[gk]) groups[gk] = [];
+                        groups[gk].push(o); });
+                    let html = '';
+                    const groupKeys = Object.keys(groups);
+                    groupKeys.sort((a, b) => { if (a === '今天') return -1; if (b === '今天') return 1; if (a === '昨天')
+                            return -1; if (b === '昨天') return 1; const da = groups[a][0]?.timestamp || 0; const db =
+                            groups[b][0]?.timestamp || 0; return db - da; });
+                    groupKeys.forEach((gk, gi) => {
+                        const gOrders = groups[gk];
+                        const gCount = gOrders.reduce((s, o) => s + o.quantity, 0);
+                        const gTotal = gOrders.reduce((s, o) => s + o.price * o.quantity, 0);
+                        const gConfirmed = gOrders.filter(o => o.confirmed).length;
+                        const gAllConfirmed = gConfirmed === gOrders.length;
+                        const collapsed = gi > 0 && gAllConfirmed;
+                        html +=
+                            `<div class="date-group"><div class="date-group-header${collapsed?' collapsed':''}" data-group="${gk}"><span class="collapse-arrow">▼</span><span>📅 ${gk}</span><span style="font-size:0.75rem;color:var(--text-light);">(${gOrders.length}单·${gCount}道·¥${gTotal.toFixed(2)})</span>${gAllConfirmed?' <span style="font-size:0.65rem;color:var(--success);">✓全部确认</span>':''}</div><div class="date-group-body${collapsed?' collapsed':''}"><div class="date-group-body-inner">`;
+                        gOrders.forEach(o => {
+                            const timeStr = getTimeAgo(o.timestamp);
+                            const isConfirmed = o.confirmed === true;
+                            const inMenu = menuData.some(m => m.id === o.dishId);
+                            const addBtn = !inMenu ?
+                                `<button class="btn btn-xs btn-secondary btn-add-local" data-oid="${escapeHtml(o.id)}" onclick="event.stopPropagation();">➕</button>` :
+                                '';
+                            const confirmBtn = !isConfirmed ? '<button class="btn-confirm" data-id="' +
+                                o.id + '">✅ 确认</button>' :
+                                '<span class="badge-confirmed">✓</span>';
+                            const removeBtn = (o.userId === userId) ?
+                                '<button class="btn btn-xs btn-danger-outline btn-rem" data-id="' + o
+                                .id + '">移除</button>' : '';
+                            html +=
+                                `<div class="order-item${isConfirmed?' confirmed':''}">${getOrderItemIconHTML(o.emoji)}<div class="oi-info"><div class="oi-name" onclick="window.__showTutorial(${o.dishId})" title="点击查看教程">${escapeHtml(o.name)} x${o.quantity}</div><div class="oi-user">👤 ${escapeHtml(o.userName||'匿名')} · ¥${(o.price*o.quantity).toFixed(2)}</div>${o.note?'<div class="oi-note">📝 '+escapeHtml(o.note)+'</div>':''}<div class="oi-time">${timeStr}</div></div><div class="oi-actions">${confirmBtn}${removeBtn}${addBtn}</div></div>`;
+                        });
+                        html += '</div></div></div>';
+                    });
+                    sharedOrdersList.innerHTML = html;
+                    sharedOrdersList.querySelectorAll('.date-group-header').forEach(h => h.onclick = () => { const body =
+                            h.nextElementSibling;
+                        h.classList.toggle('collapsed');
+                        body.classList.toggle('collapsed');
+                        SoundFX.click(); });
+                    sharedOrdersList.querySelectorAll('.btn-confirm').forEach(b => b.onclick = () => confirmOrder(b
+                        .dataset.id));
+                    sharedOrdersList.querySelectorAll('.btn-rem').forEach(b => b.onclick = () => removeSharedOrder(b
+                        .dataset.id));
+                    sharedOrdersList.querySelectorAll('.btn-add-local').forEach(b => b.onclick = () => { const oid = b
+                            .dataset.oid; const od = sharedOrders[oid]; if (od && !menuData.some(m => m.name === od
+                                .name && m.price === od.price)) { const nid = Math.max(0, ...menuData.map(d => d.id)) +
+                                1;
+                            menuData.push({ id: nid, name: od.name, price: od.price, emoji: od.emoji || '🍽️',
+                                category: '其他', desc: '', video: '', tutorial: '暂无教程，请在管理页面编辑。' });
+                            saveMenu();
+                            renderOrderPage();
+                            renderManagePage();
+                            renderSharedOrders();
+                            showToast('已添加「' + od.name + '」'); } else if (od) showToast('已在菜单中',
+                            'warning'); });
+                    const total = orders.reduce((s, o) => s + o.price * o.quantity, 0);
+                    sharedTotalPrice.textContent = '¥' + total.toFixed(2);
+                    sharedTotalItems.textContent = orders.reduce((s, o) => s + o.quantity, 0);
+                    sharedSummary.style.display = 'flex';
+                    const unconfirmedCount = orders.filter(o => !o.confirmed).length;
+                    btnConfirmAll.style.display = unconfirmedCount > 0 ? 'inline-flex' : 'none';
+                    if (unconfirmedCount > 0) btnConfirmAll.textContent = '✅ 一键确认全部(' + unconfirmedCount + ')';
+                }
+                const hist = getHistory(currentRoom).reverse();
+                historySection.style.display = hist.length > 0 ? 'block' : 'none';
+                if (hist.length > 0) {
+                    const hGroups = {};
+                    const now = new Date();
+                    const todayStr = now.toDateString();
+                    const yesterdayStr = new Date(now - 86400000).toDateString();
+                    hist.forEach(o => {
+                        const d = new Date(o.timestamp);
+                        const ds = d.toDateString();
+                        let gk;
+                        if (ds === todayStr) gk = '今天';
+                        else if (ds === yesterdayStr) gk = '昨天';
+                        else gk = d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+                        if (!hGroups[gk]) hGroups[gk] = [];
+                        hGroups[gk].push(o);
+                    });
+                    const hGroupKeys = Object.keys(hGroups);
+                    hGroupKeys.sort((a, b) => {
+                        if (a === '今天') return -1;
+                        if (b === '今天') return 1;
+                        if (a === '昨天') return -1;
+                        if (b === '昨天') return 1;
+                        const da = hGroups[a][0]?.timestamp || 0;
+                        const db = hGroups[b][0]?.timestamp || 0;
+                        return db - da;
+                    });
+                    let histHtml = '<div style="display:flex;flex-direction:column;gap:6px;">';
+                    hGroupKeys.forEach((gk, gi) => {
+                        const gOrders = hGroups[gk];
+                        const gCount = gOrders.reduce((s, o) => s + (o.quantity || 1), 0);
+                        const gTotal = gOrders.reduce((s, o) => s + (o.price || 0) * (o.quantity || 1), 0);
+                        const collapsed = gi > 0;
+                        histHtml +=
+                            `<div class="date-group" style="margin-bottom:2px;"><div class="history-date-group-header${collapsed?' collapsed':''}" data-history-group="${gk}"><span class="collapse-arrow">▼</span><span>📅 ${gk}</span><span style="font-size:0.72rem;color:var(--text-light);">(${gOrders.length}单·${gCount}道·¥${gTotal.toFixed(2)})</span><span style="font-size:0.65rem;color:var(--success);">✓全部确认</span></div><div class="history-date-group-body${collapsed?' collapsed':''}"><div class="history-date-group-body-inner">`;
+                        gOrders.forEach(o => {
+                            const timeStr = getTimeAgo(o.timestamp);
+                            const dishIdForTutorial = o.dishId || o.id || 0;
+                            histHtml +=
+                                `<div class="history-item">${getOrderItemIconHTML(o.emoji)}<span style="flex:1;min-width:0;"><strong style="cursor:pointer;color:var(--primary);" onclick="window.__showTutorial(${dishIdForTutorial})" title="点击查看教程">${escapeHtml(o.name)}</strong> x${o.quantity||1}</span><span style="margin-left:auto;font-size:0.8rem;">👤 ${escapeHtml(o.userName||'匿名')}</span><span style="font-size:0.72rem;color:#888;">${timeStr}</span><span style="font-size:0.7rem;color:var(--success);">✓</span></div>`;
+                        });
+                        histHtml += '</div></div></div>';
+                    });
+                    histHtml += '</div>';
+                    historyList.innerHTML = histHtml;
+                    historyList.querySelectorAll('.history-date-group-header').forEach(h => {
+                        h.onclick = () => {
+                            const body = h.nextElementSibling;
+                            h.classList.toggle('collapsed');
+                            body.classList.toggle('collapsed');
+                            SoundFX.click();
+                        };
+                    });
+                }
+            }
+
+            function getTimeAgo(ts) { const d = Date.now() - ts; const m = Math.floor(d / 60000); if (m < 1) return '刚刚'; if (
+                    m < 60) return m + '分钟前'; const h = Math.floor(m / 60); if (h < 24) return h + '小时前'; return new Date(ts)
+                    .toLocaleDateString(); }
+
+            function renderManagePage() { document.getElementById('mgmtCount').textContent = menuData.length;
+                document.getElementById('mgmtDishList').innerHTML = menuData.map(d =>
+                    `<li class="mgmt-dish-item">${getDishIconHTML(d.emoji)}<div style="flex:1;min-width:120px;"><strong>${escapeHtml(d.name)}</strong><br><small>${escapeHtml(d.category)} · ¥${d.price.toFixed(2)}</small>${d.tutorial?'<br><small style="color:#999;">📖 有教程</small>':''}${d.video?'<br><small style="color:#5a8fbf;">🎬 有视频</small>':''}</div><button class="btn btn-sm btn-secondary btn-edit" data-id="${d.id}">✏️</button><button class="btn btn-sm btn-danger-outline btn-delete" data-id="${d.id}">🗑️</button></li>`
+                    ).join('');
+                document.querySelectorAll('.btn-edit').forEach(b => b.onclick = () => startEditDish(parseInt(b.dataset
+                .id)));
+                document.querySelectorAll('.btn-delete').forEach(b => b.onclick = async () => { const id = parseInt(b
+                        .dataset.id); const d = menuData.find(m => m.id === id); if (d && await showModal('删除',
+                        '删除「' + escapeHtml(d.name) + '」？', [{ text: '取消', cls: 'btn-secondary' }, { text: '删除',
+                            cls: 'btn-danger-outline' }
+                    ])) { menuData = menuData.filter(m => m.id !== id);
+                    saveMenu();
+                    syncCartMenu();
+                    saveCart();
+                    updateCartBadge();
+                    renderManagePage();
+                    renderOrderPage();
+                    renderCartPage();
+                    showToast('已删除「' + d.name + '」'); } });
+                document.getElementById('emojiPicker').innerHTML = FOOD_EMOJIS.map(e =>
+                    `<button class="emoji-opt" data-emoji="${e}" title="${e}">${e}</button>`).join('');
+                document.querySelectorAll('.emoji-opt').forEach(b => b.onclick = () => { document.getElementById(
+                        'mgmtEmoji').value = b.dataset.emoji;
+                    SoundFX.click(); }); }
+
+            function startEditDish(id) { const d = menuData.find(m => m.id === id); if (!d) return;
+                document.getElementById('mgmtName').value = d.name;
+                document.getElementById('mgmtPrice').value = d.price;
+                document.getElementById('mgmtCategory').value = d.category;
+                document.getElementById('mgmtEmoji').value = d.emoji || '';
+                document.getElementById('mgmtDesc').value = d.desc || '';
+                document.getElementById('mgmtTutorial').value = d.tutorial || '';
+                document.getElementById('mgmtVideo').value = d.video || '';
+                document.getElementById('mgmtEditId').value = d.id;
+                document.getElementById('mgmtFormTitle').textContent = '✏️ 编辑菜品';
+                document.getElementById('btnCancelEdit').style.display = 'inline-flex';
+                document.getElementById('mgmtName').focus(); }
+
+            function resetManageForm() { document.getElementById('mgmtName').value = '';
+                document.getElementById('mgmtPrice').value = '';
+                document.getElementById('mgmtCategory').value = '';
+                document.getElementById('mgmtEmoji').value = '';
+                document.getElementById('mgmtDesc').value = '';
+                document.getElementById('mgmtTutorial').value = '';
+                document.getElementById('mgmtVideo').value = '';
+                document.getElementById('mgmtEditId').value = '';
+                document.getElementById('mgmtFormTitle').textContent = '➕ 添加新菜品';
+                document.getElementById('btnCancelEdit').style.display = 'none'; }
+            document.getElementById('btnSaveDish').onclick = () => { const name = document.getElementById('mgmtName').value
+                    .trim(),
+                    price = parseFloat(document.getElementById('mgmtPrice').value), cat = document.getElementById(
+                        'mgmtCategory').value.trim(), emoji = document.getElementById('mgmtEmoji').value.trim() || '🍽️',
+                    desc = document.getElementById('mgmtDesc').value.trim(),
+                    tutorial = document.getElementById('mgmtTutorial').value.trim(),
+                    video = document.getElementById('mgmtVideo').value.trim(); if (!name || isNaN(price) || price <=
+                    0 || !cat) { showToast('请填写完整', 'warning'); return; } const eid = document.getElementById('mgmtEditId')
+                    .value; if (
+                    eid) { const d = menuData.find(m => m.id === parseInt(eid)); if (d) { d.name = name;
+                        d.price = price;
+                        d.category = cat;
+                        d.emoji = emoji;
+                        d.desc = desc;
+                        d.tutorial = tutorial || '暂无教程，请在管理页面编辑。';
+                        d.video = video; } } else menuData.push({ id: Math.max(0, ...menuData.map(d => d.id)) + 1, name,
+                    price, category: cat, emoji, desc,
+                    tutorial: tutorial || '暂无教程，请在管理页面编辑。', video });
+                saveMenu();
+                syncCartMenu();
+                saveCart();
+                resetManageForm();
+                renderManagePage();
+                renderOrderPage();
+                SoundFX.success();
+                showToast('已保存', 'success'); };
+            document.getElementById('btnCancelEdit').onclick = resetManageForm;
+            document.getElementById('btnResetMenu').onclick = async () => { if (await showModal('恢复默认',
+                    '替换所有菜品并清空购物车？', [{ text: '取消', cls: 'btn-secondary' }, { text: '确认',
+                        cls: 'btn-danger-outline' }
+                ])) { menuData = JSON.parse(JSON.stringify(CORE_DISHES)).concat(generateExtraDishes(31, 90));
+                saveMenu();
+                cartData = [];
+                saveCart();
+                updateCartBadge();
+                renderManagePage();
+                renderOrderPage();
+                renderCartPage(); } };
+
+            // ========== 贪吃蛇（穿墙模式 + 背景音效） ==========
+            let snakeGame = null,
+                snakeLoopId = null;
+
+            function initSnakeGame() {
+                const canvas = document.getElementById('snakeCanvas');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                const wrap = document.getElementById('snakeCanvasWrap');
+                const scoreEl = document.getElementById('snakeScore');
+                const highScoreEl = document.getElementById('snakeHighScore');
+                const oldOv = wrap.querySelector('.game-over-overlay');
+                if (oldOv) oldOv.remove();
+                const gs = 20;
+                const cols = Math.floor(canvas.width / gs);
+                const rows = Math.floor(canvas.height / gs);
+                let snake = [{ x: 8, y: 10 }, { x: 7, y: 10 }, { x: 6, y: 10 }];
+                let food = { x: 14, y: 10 };
+                let dir = { x: 1, y: 0 },
+                    ndir = { x: 1, y: 0 };
+                let score = 0,
+                    highScore = parseInt(localStorage.getItem(STORAGE.SNAKE_HIGH) || '0');
+                let gameOver = false,
+                    gameSpeed = 120,
+                    lastTime = 0;
+                highScoreEl.textContent = highScore;
+                scoreEl.textContent = '0';
+                SoundFX.startSnakeBgm(gameSpeed);
+
+                function spawnFood() { let fx, fy; do { fx = Math.floor(Math.random() * cols);
+                        fy = Math.floor(Math.random() * rows); } while (snake.some(s => s.x === fx && s.y ===
+                    fy));
+                    food = { x: fx, y: fy }; }
+
+                function draw() { ctx.fillStyle = '#1a1a2e';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+                    ctx.lineWidth = 0.5; for (let i = 0; i <= cols; i++) { ctx.beginPath();
+                        ctx.moveTo(i * gs, 0);
+                        ctx.lineTo(i * gs, canvas.height);
+                        ctx.stroke(); } for (let i = 0; i <= rows; i++) { ctx.beginPath();
+                        ctx.moveTo(0, i * gs);
+                        ctx.lineTo(canvas.width, i * gs);
+                        ctx.stroke(); }
+                    snake.forEach((seg, i) => { const gx = seg.x * gs,
+                            gy = seg.y * gs; const gr = ctx.createRadialGradient(gx + gs / 2, gy + gs / 2, 2,
+                                gx + gs / 2, gy + gs / 2, gs / 2);
+                        gr.addColorStop(0, i === 0 ? '#5effc8' : '#4ecca3');
+                        gr.addColorStop(1, i === 0 ? '#3daa80' : '#2d8a65');
+                        ctx.fillStyle = gr;
+                        ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(gx + 1, gy + 1, gs - 2, gs - 2, 4); else ctx
+                            .arc(gx + gs / 2, gy + gs / 2, gs / 2 - 1, 0, Math.PI * 2);
+                        ctx.fill(); if (i === 0) { ctx.fillStyle = '#fff'; let ex = gx + gs * 0.65,
+                                ey = gy + gs * 0.3; if (dir.x === -1) ex = gx + gs * 0.25; if (dir.y ===
+                                -1) ey = gy + gs * 0.25; if (dir.y === 1) ey = gy + gs * 0.7;
+                            ctx.beginPath();
+                            ctx.arc(ex, ey, 3, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.beginPath();
+                            ctx.arc(ex, ey + gs * 0.35, 3, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.fillStyle = '#111';
+                            ctx.beginPath();
+                            ctx.arc(ex, ey, 1.5, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.beginPath();
+                            ctx.arc(ex, ey + gs * 0.35, 1.5, 0, Math.PI * 2);
+                            ctx.fill(); } }); const fx = food.x * gs + gs / 2,
+                        fy = food.y * gs + gs / 2; const fg = ctx.createRadialGradient(fx, fy, 2, fx, fy, gs / 2);
+                    fg.addColorStop(0, '#ff6b6b');
+                    fg.addColorStop(1, '#c0392b');
+                    ctx.fillStyle = fg;
+                    ctx.beginPath();
+                    ctx.arc(fx, fy, gs / 2 - 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+                    ctx.beginPath();
+                    ctx.arc(fx - 2, fy - 2, gs / 5, 0, Math.PI * 2);
+                    ctx.fill(); }
+
+                function update() { if (gameOver) return;
+                    dir = { ...ndir }; const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+                    if (head.x < 0) head.x = cols - 1;
+                    else if (head.x >= cols) head.x = 0;
+                    if (head.y < 0) head.y = rows - 1;
+                    else if (head.y >= rows) head.y = 0;
+                    if (snake.some(s => s.x === head.x && s.y === head.y)) { endGame(); return; }
+                    snake.unshift(head);
+                    SoundFX.move(); if (head.x === food.x && head.y === food.y) { score += 10;
+                        scoreEl.textContent = score;
+                        spawnFood();
+                        gameSpeed = Math.max(50, 120 - Math.floor(score / 20));
+                        SoundFX.updateSnakeBgmSpeed(gameSpeed);
+                        SoundFX.eat(); } else snake.pop();
+                    draw(); }
+
+                function endGame() { gameOver = true;
+                    SoundFX.stopSnakeBgm(); if (score > highScore) { highScore = score;
+                        localStorage.setItem(STORAGE.SNAKE_HIGH, highScore);
+                        highScoreEl.textContent = highScore; }
+                    SoundFX.gameOver(); const ov = document.createElement('div');
+                    ov.className = 'game-over-overlay';
+                    ov.innerHTML =
+                        `<h3>🎮 游戏结束</h3><p style="font-size:1.2rem;">得分：<strong>${score}</strong></p><button class="btn btn-primary" id="btnSnakeRetry">🔄 再来一局</button>`;
+                    wrap.appendChild(ov);
+                    document.getElementById('btnSnakeRetry').onclick = () => { ov.remove();
+                        resetGame(); }; }
+
+                function resetGame() { const oldOv = wrap.querySelector('.game-over-overlay'); if (oldOv) oldOv
+                    .remove();
+                    snake = [{ x: 8, y: 10 }, { x: 7, y: 10 }, { x: 6, y: 10 }];
+                    dir = { x: 1, y: 0 };
+                    ndir = { x: 1, y: 0 };
+                    score = 0;
+                    gameSpeed = 120;
+                    gameOver = false;
+                    scoreEl.textContent = '0';
+                    SoundFX.startSnakeBgm(gameSpeed);
+                    spawnFood();
+                    draw();
+                    lastTime = performance.now(); if (snakeLoopId) cancelAnimationFrame(snakeLoopId);
+                    snakeLoopId = requestAnimationFrame(gameLoop); }
+
+                function gameLoop(ts) { if (!gameOver && document.getElementById('page-game').classList.contains(
+                            'active')) { if (ts - lastTime >= gameSpeed) { update();
+                            lastTime = ts; }
+                        snakeLoopId = requestAnimationFrame(gameLoop); } else if (!gameOver) { snakeLoopId =
+                        requestAnimationFrame(gameLoop); } else { SoundFX.stopSnakeBgm(); } }
+
+                function handleKey(e) { const km = { 'ArrowUp': { x: 0, y: -1 }, 'ArrowDown': { x: 0, y: 1 },
+                        'ArrowLeft': { x: -1, y: 0 }, 'ArrowRight': { x: 1, y: 0 }, 'w': { x: 0, y: -1 },
+                        's': { x: 0, y: 1 }, 'a': { x: -1, y: 0 }, 'd': { x: 1, y: 0 }, 'W': { x: 0, y: -1 },
+                        'S': { x: 0, y: 1 }, 'A': { x: -1, y: 0 }, 'D': { x: 1, y: 0 } }; const nd = km[e.key]; if (
+                        nd) { e.preventDefault(); if (nd.x !== -dir.x || nd.y !== -dir.y) ndir = nd; } }
+                let tsx = 0,
+                    tsy = 0;
+                canvas.addEventListener('touchstart', e => { e.preventDefault();
+                    tsx = e.touches[0].clientX;
+                    tsy = e.touches[0].clientY; }, { passive: false });
+                canvas.addEventListener('touchend', e => { e.preventDefault(); const dx = (e.changedTouches[0]
+                        ?.clientX || tsx) - tsx; const dy = (e.changedTouches[0]?.clientY || tsy) - tsy; if (Math
+                        .max(Math.abs(dx), Math.abs(dy)) < 15) return; let nd; if (Math.abs(dx) > Math.abs(dy))
+                        nd = { x: dx > 0 ? 1 : -1, y: 0 }; else nd = { x: 0, y: dy > 0 ? 1 : -1 }; if (nd.x !== -
+                        dir.x || nd.y !== -dir.y) ndir = nd; }, { passive: false });
+                document.addEventListener('keydown', handleKey);
+                document.getElementById('btnSnakeRestart').onclick = () => { resetGame();
+                    SoundFX.click(); };
+                draw();
+                lastTime = performance.now();
+                snakeLoopId = requestAnimationFrame(gameLoop);
+                snakeGame = { destroy() { gameOver = true;
+                        SoundFX.stopSnakeBgm(); if (snakeLoopId) cancelAnimationFrame(snakeLoopId);
+                        snakeLoopId = null;
+                        document.removeEventListener('keydown', handleKey); const ov = wrap.querySelector(
+                            '.game-over-overlay'); if (ov) ov.remove(); }, reset() { resetGame(); } };
+            }
+
+            function destroySnakeGame() { if (snakeGame) { snakeGame.destroy();
+                    snakeGame = null; } if (snakeLoopId) { cancelAnimationFrame(snakeLoopId);
+                    snakeLoopId = null; }
+                SoundFX.stopSnakeBgm(); }
+
+            // ========== 猜数字（含背景音效） ==========
+            let guessGame = { target: 0, attempts: 0, history: [], finished: false };
+
+            function initGuessGame() { guessGame.target = Math.floor(Math.random() * 100) + 1;
+                guessGame.attempts = 0;
+                guessGame.history = [];
+                guessGame.finished = false; const inp = document.getElementById('guessInput'); if (inp) { inp.value = '';
+                    inp.disabled = false;
+                    inp.focus(); } const hint = document.getElementById('guessHint'); if (hint) { hint.textContent = '';
+                    hint.style.color = ''; } const hd = document.getElementById('guessHistory'); if (hd) hd.innerHTML = ''; const
+                    bs = document.getElementById('btnGuessSubmit'); if (bs) bs.style.display = ''; const br = document
+                    .getElementById('btnGuessRestart'); if (br) br.style.display = 'none';
+                SoundFX.startGuessBgm(); }
+
+            function submitGuess() { if (guessGame.finished) return; const inp = document.getElementById('guessInput'); if (
+                    !inp) return; const v = parseInt(inp.value); if (isNaN(v) || v < 1 || v > 100) { const hint = document
+                        .getElementById('guessHint'); if (hint) { hint.textContent = '⚠️ 请输入1-100之间的数字';
+                        hint.style.color = '#e09b4c'; }
+                    SoundFX.wrong(); return; }
+                guessGame.attempts++; const r = v > guessGame.target ? 'high' : v < guessGame.target ? 'low' : 'correct';
+                guessGame.history.push({ val: v, result: r }); const hint = document.getElementById('guessHint'); if (r ===
+                    'high') { if (hint) { hint.textContent = '📈 太大了！';
+                        hint.style.color = '#e07b4c'; }
+                    SoundFX.wrong(); } else if (r === 'low') { if (hint) { hint.textContent = '📉 太小了！';
+                        hint.style.color = '#5a8fbf'; }
+                    SoundFX.wrong(); } else { if (hint) { hint.textContent = '🎉 恭喜！共猜了 ' + guessGame.attempts + ' 次';
+                        hint.style.color = 'var(--success)'; }
+                    guessGame.finished = true;
+                    document.getElementById('btnGuessSubmit').style.display = 'none';
+                    document.getElementById('btnGuessRestart').style.display = '';
+                    inp.disabled = true;
+                    SoundFX.stopGuessBgm();
+                    SoundFX.guessCorrect(); }
+                inp.value = '';
+                inp.focus();
+                renderGuessHistory(); }
+
+            function renderGuessHistory() { const hd = document.getElementById('guessHistory'); if (!hd) return;
+                hd.innerHTML = guessGame.history.map((h, i) => { let cls = h.result === 'high' ? 'too-high' : h.result ===
+                        'low' ? 'too-low' : 'correct'; let icon = h.result === 'high' ? '⬆️' : h.result === 'low' ?
+                        '⬇️' : '✅'; let label = h.result === 'high' ? '太大' : h.result === 'low' ? '太小' : '正确!'; return (
+                        `<div class="gh-item ${cls}"><span>#${i+1} 猜：${h.val}</span><span>${icon} ${label}</span></div>`
+                        ); }).join(''); }
+
+            function destroyGuessGame() { SoundFX.stopGuessBgm();
+                guessGame.finished = true; }
+
+            // ========== 打砖块 ==========
+            let breakoutGame = null,
+                breakoutLoopId = null;
+
+            function initBreakoutGame() {
+                const canvas = document.getElementById('breakoutCanvas');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                const wrap = document.getElementById('breakoutCanvasWrap');
+                const scoreEl = document.getElementById('breakoutScore');
+                const highScoreEl = document.getElementById('breakoutHighScore');
+                const oldOv = wrap.querySelector('.game-over-overlay');
+                if (oldOv) oldOv.remove();
+                const w = canvas.width,
+                    h = canvas.height;
+                let paddle = { x: w / 2 - 40, y: h - 25, w: 80, h: 12 };
+                let ball = { x: w / 2, y: h - 40, r: 6, dx: 2, dy: -2.5 };
+                let bricks = [];
+                let score = 0,
+                    highScore = parseInt(localStorage.getItem(STORAGE.BREAKOUT_HIGH) || '0');
+                let gameOver = false,
+                    gameWin = false;
+                highScoreEl.textContent = highScore;
+                scoreEl.textContent = '0';
+                const brickRowCount = 5,
+                    brickColCount = 8,
+                    brickW = 40,
+                    brickH = 18,
+                    brickPad = 4,
+                    brickOffsetTop = 40,
+                    brickOffsetLeft = 20;
+
+                function initBricks() { bricks = []; for (let r = 0; r < brickRowCount; r++) for (let c = 0; c <
+                        brickColCount; c++) bricks.push({ x: c * (brickW + brickPad) + brickOffsetLeft, y: r * (
+                            brickH + brickPad) + brickOffsetTop, status: 1 }); }
+
+                function draw() { ctx.fillStyle = '#1a1a2e';
+                    ctx.fillRect(0, 0, w, h);
+                    bricks.forEach(b => { if (b.status === 1) { ctx.fillStyle = '#e07b4c';
+                            ctx.fillRect(b.x, b.y, brickW, brickH); } });
+                    ctx.fillStyle = '#4ecca3';
+                    ctx.fillRect(paddle.x, paddle.y, paddle.w, paddle.h);
+                    ctx.beginPath();
+                    ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+                    ctx.fillStyle = '#ff6b6b';
+                    ctx.fill();
+                    ctx.fillStyle = '#fff';
+                    ctx.font = '14px sans-serif';
+                    ctx.fillText('Score: ' + score, 8, 16); }
+
+                function update() { if (gameOver || gameWin) return;
+                    ball.x += ball.dx;
+                    ball.y += ball.dy; if (ball.x - ball.r < 0 || ball.x + ball.r > w) { ball.dx = -ball.dx;
+                        SoundFX.pinballBounce(); } if (ball.y - ball.r < 0) { ball.dy = -ball.dy;
+                        SoundFX.pinballBounce(); } if (ball.y + ball.r > paddle.y && ball.x > paddle.x && ball.x < paddle
+                        .x + paddle.w) { ball.dy = -Math.abs(ball.dy);
+                        SoundFX.paddle(); } else if (ball.y + ball.r > h) { gameOver = true;
+                        SoundFX.gameOver(); }
+                    bricks.forEach(b => { if (b.status === 1 && ball.x > b.x && ball.x < b.x + brickW && ball.y > b
+                            .y && ball.y < b.y + brickH) { b.status = 0;
+                            ball.dy = -ball.dy;
+                            score += 10;
+                            scoreEl.textContent = score;
+                            SoundFX.brick(); } }); if (bricks.every(b => b.status === 0)) gameWin = true;
+                    draw(); }
+
+                function resetGame() { const oldOv = wrap.querySelector('.game-over-overlay'); if (oldOv) oldOv.remove();
+                    paddle.x = w / 2 - 40;
+                    ball = { x: w / 2, y: h - 40, r: 6, dx: 2, dy: -2.5 };
+                    score = 0;
+                    gameOver = false;
+                    gameWin = false;
+                    scoreEl.textContent = '0';
+                    initBricks();
+                    draw(); if (breakoutLoopId) cancelAnimationFrame(breakoutLoopId);
+                    breakoutLoopId = requestAnimationFrame(loop); }
+
+                function loop() { if (!gameOver && !gameWin) { update();
+                        breakoutLoopId = requestAnimationFrame(loop); } else { if (gameOver && score > highScore) {
+                            highScore = score;
+                            localStorage.setItem(STORAGE.BREAKOUT_HIGH, highScore);
+                            highScoreEl.textContent = highScore; } const ov = document.createElement('div');
+                        ov.className = 'game-over-overlay';
+                        ov.innerHTML =
+                            `<h3>${gameWin?'🎉 你赢了！':'💥 游戏结束'}</h3><p>得分：<strong>${score}</strong></p><button class="btn btn-primary" id="btnBreakoutRetry">🔄 再来一局</button>`;
+                        wrap.appendChild(ov);
+                        document.getElementById('btnBreakoutRetry').onclick = () => { ov.remove();
+                            resetGame(); }; } }
+
+                function handleKey(e) { if (e.key === 'ArrowLeft') { paddle.x = Math.max(0, paddle.x - 20);
+                        SoundFX.paddle(); } else if (e.key === 'ArrowRight') { paddle.x = Math.min(w - paddle.w, paddle
+                            .x + 20);
+                        SoundFX.paddle(); } }
+                let touchX = 0;
+                canvas.addEventListener('touchmove', e => { e.preventDefault();
+                    touchX = e.touches[0].clientX; const rect = canvas.getBoundingClientRect(); const relX = touchX - rect
+                        .left;
+                    paddle.x = Math.max(0, Math.min(w - paddle.w, relX - paddle.w / 2)); }, { passive: false });
+                document.addEventListener('keydown', handleKey);
+                document.getElementById('btnBreakoutRestart').onclick = resetGame;
+                initBricks();
+                draw();
+                breakoutLoopId = requestAnimationFrame(loop);
+                breakoutGame = { destroy() { gameOver = true; if (breakoutLoopId) cancelAnimationFrame(breakoutLoopId);
+                        breakoutLoopId = null;
+                        document.removeEventListener('keydown', handleKey); const ov = wrap.querySelector(
+                            '.game-over-overlay'); if (ov) ov.remove(); }, reset() { resetGame(); } };
+            }
+
+            function destroyBreakoutGame() { if (breakoutGame) { breakoutGame.destroy();
+                    breakoutGame = null; } if (breakoutLoopId) { cancelAnimationFrame(breakoutLoopId);
+                    breakoutLoopId = null; } }
+
+            // ========== 游戏页面切换 ==========
+            function renderGamePage() {
+                const ag = document.querySelector('.game-select-btn.active')?.dataset.game || 'snake';
+                const containers = {
+                    snake: document.getElementById('gameSnakeContainer'),
+                    guess: document.getElementById('gameGuessContainer'),
+                    breakout: document.getElementById('gameBreakoutContainer')
+                };
+                Object.keys(containers).forEach(k => { if (containers[k]) containers[k].style.display = k === ag ? '' :
+                        'none'; });
+                destroySnakeGame();
+                destroyBreakoutGame();
+                SoundFX.stopAllBgm();
+                if (ag === 'snake') initSnakeGame();
+                else if (ag === 'breakout') initBreakoutGame();
+                else if (ag === 'guess') { destroyGuessGame();
+                    initGuessGame(); }
+            }
+            document.querySelectorAll('.game-select-btn').forEach(b => b.onclick = () => { document.querySelectorAll(
+                        '.game-select-btn').forEach(x => x.classList.remove('active'));
+                b.classList.add('active');
+                SoundFX.click();
+                renderGamePage(); });
+
+            // ========== Toast & Modal ==========
+            window.showToast = function(msg, type = 'info') { const t = document.createElement('div');
+                t.className = 'toast toast-' + (type === 'warning' ? 'warning' : type === 'success' ? 'success' :
+                    'info');
+                t.textContent = msg;
+                document.getElementById('toastContainer').appendChild(t);
+                setTimeout(() => { t.style.opacity = '0';
+                    t.style.transition = '0.3s';
+                    setTimeout(() => t.remove(), 300); }, 2600); };
+            async function showModal(title, msg, buttons, extraHtml = '') { return new Promise(resolve => { const ov =
+                        document.createElement('div');
+                    ov.className = 'modal-overlay'; const d = document.createElement('div');
+                    d.className = 'modal-dialog';
+                    d.innerHTML = (title ? '<h3>' + title + '</h3>' : '') + '<div style="margin:12px 0;">' + msg +
+                        '</div>' + extraHtml + '<div class="btn-row"></div>'; const row = d.querySelector('.btn-row');
+                    buttons.forEach(b => { const btn = document.createElement('button');
+                        btn.className = 'btn ' + (b.cls || 'btn-primary');
+                        btn.textContent = b.text;
+                        btn.onclick = () => { if (b.action) b.action();
+                            ov.remove();
+                            resolve(b.value || b.text); };
+                        row.appendChild(btn); });
+                    ov.appendChild(d);
+                    ov.onclick = e => { if (e.target === ov) { ov.remove();
+                            resolve(null); } };
+                    document.body.appendChild(ov);
+                    setTimeout(() => { const inp = d.querySelector('input'); if (inp) inp.focus(); }, 150); }); }
+            window.showModal = showModal;
+
+            function switchPage(name) {
+                if (name !== 'game') {
+                    SoundFX.stopAllBgm();
+                    destroySnakeGame();
+                    destroyBreakoutGame();
+                    destroyGuessGame();
+                }
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t
+                    .dataset.page === name));
+                document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + name)); if (
+                    name === 'order') renderOrderPage(); else if (name === 'cart') renderCartPage(); else if (name ===
+                    'shared') renderSharedOrders(); else if (name === 'manage') renderManagePage(); else if (name ===
+                    'game') renderGamePage(); else { destroySnakeGame();
+                    destroyBreakoutGame();
+                    destroyGuessGame();
+                    SoundFX.stopAllBgm(); } }
+            document.querySelectorAll('.nav-tab').forEach(t => t.onclick = () => switchPage(t.dataset.page));
+
+            function refreshView() { const a = document.querySelector('.page.active')?.id.replace('page-', ''); if (a ===
+                    'order') applyFilters(); else if (a === 'cart') renderCartPage(); else if (a === 'shared')
+                renderSharedOrders(); }
+            searchInput.addEventListener('input', () => { if (document.getElementById('page-order').classList.contains(
+                    'active')) applyFilters(); });
+            btnClearSearch.addEventListener('click', () => { searchInput.value = '';
+                applyFilters(); });
+
+            let deferredPrompt;
+            window.addEventListener('beforeinstallprompt', e => { e.preventDefault();
+                deferredPrompt = e;
+                document.getElementById('btnInstall').classList.add('show'); });
+            document.getElementById('btnInstall').onclick = () => { if (deferredPrompt) { deferredPrompt.prompt();
+                    deferredPrompt = null; } };
+            if ('serviceWorker' in navigator) { try { const sw =
+                    "const C='dinner-v13';self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(['/']))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));";
+                    const b = new Blob([sw], { type: 'application/javascript' });
+                    navigator.serviceWorker.register(URL.createObjectURL(b), { scope: '/' }).catch(() => {}); } catch (
+                e) {} }
+            document.getElementById('btnClearSharedOrders').onclick = () => clearMySharedOrders();
+            document.getElementById('btnClearHistory').onclick = async () => { if (await showModal('清除历史',
+                    '确定清除本房间所有已确认历史订单吗？', [{ text: '取消', cls: 'btn-secondary' }, { text: '清除',
+                        cls: 'btn-danger-outline' }
+                ])) { clearHistory(currentRoom);
+                renderSharedOrders();
+                showToast('历史订单已清除'); } };
+            document.getElementById('btnGuessSubmit').onclick = submitGuess;
+            document.getElementById('btnGuessRestart').onclick = () => { initGuessGame();
+                SoundFX.click(); };
+            document.getElementById('guessInput').addEventListener('keydown', e => { if (e.key === 'Enter') submitGuess
+            (); });
+
+            function init() {
+                loadMenu();
+                loadCart();
+                loadNickname();
+                loadRoom();
+                syncCartMenu();
+                updateCartBadge();
+                initHistoryIds(currentRoom);
+                roomInput.value = currentRoom;
+                displayRoomName.textContent = currentRoom; if (!gun && window.__gunLoaded && typeof Gun !== 'undefined')
+                    initGun();
+                subscribeShared();
+                switchPage('order');
+                updateNickBtn(); }
+            if (window.__gunLoaded || typeof Gun !== 'undefined') init();
+            else { let wc = 0; const wi = setInterval(() => { wc++; if (window.__gunLoaded || typeof Gun !==
+                        'undefined' || wc > 30) { clearInterval(wi); if (!gun && typeof Gun !== 'undefined')
+                        initGun();
+                    init(); } }, 200); }
+        })();
+    </script>
+</body>
+</html>

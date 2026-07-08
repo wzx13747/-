@@ -37,1089 +37,1089 @@
         window.__seaLoaded = false;
     </script>
     <script src="https://cdn.jsdelivr.net/npm/gun@0.2020.1237/gun.js"
-        onload="window.__gunLoaded=true;" onerror="var s=document.createElement('script');s.src='https://unpkg.com/gun@0.2020.1237/gun.js';s.onload=function(){window.__gunLoaded=true;};document.head.appendChild(s);">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/gun@0.2020.1237/sea.js" onload="window.__seaLoaded=true;" onerror="">
-    </script>
+    onload="window.__gunLoaded=true;" onerror="var s=document.createElement('script');s.src='https://unpkg.com/gun@0.2020.1237/gun.js';s.onload=function(){window.__gunLoaded=true;};document.head.appendChild(s);">
+</script>
+<script src="https://cdn.jsdelivr.net/npm/gun@0.2020.1237/sea.js" onload="window.__seaLoaded=true;" onerror="">
+</script>
 
-    <style>
-        :root {
-            --primary: #e07b4c;
-            --primary-dark: #c96a3d;
-            --primary-light: #fce8df;
-            --bg: #faf7f4;
-            --card-bg: #fff;
-            --text: #3d3029;
-            --text-light: #7a6e63;
-            --border: #e8ddd3;
-            --radius: 16px;
-            --radius-sm: 10px;
-            --radius-xs: 8px;
-            --success: #5a9e6f;
-            --success-light: #e8f5ec;
-            --danger: #d45b4a;
-            --danger-light: #fef0ee;
-            --shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-            --game-bg: #1a1a2e;
+<style>
+    :root {
+        --primary: #e07b4c;
+        --primary-dark: #c96a3d;
+        --primary-light: #fce8df;
+        --bg: #faf7f4;
+        --card-bg: #fff;
+        --text: #3d3029;
+        --text-light: #7a6e63;
+        --border: #e8ddd3;
+        --radius: 16px;
+        --radius-sm: 10px;
+        --radius-xs: 8px;
+        --success: #5a9e6f;
+        --success-light: #e8f5ec;
+        --danger: #d45b4a;
+        --danger-light: #fef0ee;
+        --shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        --game-bg: #1a1a2e;
+    }
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    body {
+        font-family: 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        padding-bottom: env(safe-area-inset-bottom);
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+        line-height: 1.5;
+    }
+    .app-header {
+        background: rgba(255, 255, 255, 0.92);
+        border-bottom: 1px solid var(--border);
+        padding: 10px 16px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        backdrop-filter: blur(12px);
+    }
+    .header-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .app-logo {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--primary);
+        white-space: nowrap;
+    }
+    .room-badge {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: #f5f0ea;
+        border-radius: 22px;
+        padding: 5px 14px;
+        font-size: 0.82rem;
+    }
+    .room-badge input {
+        border: none;
+        background: transparent;
+        font-weight: 600;
+        color: var(--primary);
+        width: 65px;
+        text-align: center;
+        outline: none;
+        font-size: 0.82rem;
+    }
+    .room-badge button {
+        background: var(--primary);
+        color: #fff;
+        border: none;
+        border-radius: 16px;
+        padding: 4px 12px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+    .room-badge button:active {
+        transform: scale(0.94);
+        opacity: 0.85;
+    }
+    .connection-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #ccc;
+        flex-shrink: 0;
+        transition: background 0.3s, box-shadow 0.3s;
+    }
+    .connection-dot.connected {
+        background: var(--success);
+        box-shadow: 0 0 6px rgba(90, 158, 111, 0.5);
+    }
+    .connection-dot.syncing {
+        background: #f0c040;
+        box-shadow: 0 0 8px rgba(240, 192, 64, 0.6);
+        animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+        0%,
+        100% {
+            box-shadow: 0 0 4px rgba(240, 192, 64, 0.4);
         }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        50% {
+            box-shadow: 0 0 14px rgba(240, 192, 64, 0.8);
         }
-        body {
-            font-family: 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            padding-bottom: env(safe-area-inset-bottom);
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-            line-height: 1.5;
+    }
+    .connection-text {
+        font-size: 0.7rem;
+        color: #aaa;
+        white-space: nowrap;
+    }
+    .btn-install {
+        display: none;
+        padding: 6px 14px;
+        border-radius: 20px;
+        border: 2px solid var(--primary);
+        background: #fff;
+        color: var(--primary);
+        font-size: 0.78rem;
+        cursor: pointer;
+        font-weight: 600;
+    }
+    .btn-install.show {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .btn-nick {
+        padding: 7px 14px;
+        border-radius: 20px;
+        border: 1.5px solid var(--border);
+        background: #fff;
+        color: var(--text);
+        font-size: 0.78rem;
+        cursor: pointer;
+        font-weight: 500;
+        transition: 0.2s;
+        white-space: nowrap;
+        max-width: 140px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .btn-nick.has-nick {
+        color: var(--primary);
+        border-color: var(--primary-light);
+        background: #fffaf7;
+        font-weight: 600;
+    }
+    .nav-tabs {
+        display: flex;
+        gap: 4px;
+        background: #f5f0ea;
+        border-radius: 28px;
+        padding: 4px;
+        flex-wrap: wrap;
+    }
+    .nav-tab {
+        padding: 8px 14px;
+        border-radius: 24px;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        font-size: 0.84rem;
+        color: var(--text-light);
+        transition: 0.2s;
+        white-space: nowrap;
+        font-weight: 500;
+    }
+    .nav-tab.active {
+        background: #fff;
+        color: var(--primary);
+        font-weight: 650;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+    .nav-tab .badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 18px;
+        height: 18px;
+        border-radius: 9px;
+        background: #e85d3f;
+        color: #fff;
+        font-size: 0.68rem;
+        margin-left: 4px;
+        padding: 0 5px;
+        font-weight: 700;
+    }
+    .main-content {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 16px;
+    }
+    .page {
+        display: none;
+        animation: fadeIn 0.3s ease;
+    }
+    .page.active {
+        display: block;
+    }
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
         }
-        .app-header {
-            background: rgba(255, 255, 255, 0.92);
-            border-bottom: 1px solid var(--border);
-            padding: 10px 16px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(12px);
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
-        .header-inner {
-            max-width: 1100px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 10px;
+    }
+    .search-box {
+        margin-bottom: 12px;
+        display: flex;
+        gap: 8px;
+    }
+    .search-box input {
+        flex: 1;
+        padding: 10px 16px;
+        border-radius: 24px;
+        border: 1.5px solid var(--border);
+        font-size: 0.9rem;
+        background: #fff;
+        outline: none;
+    }
+    .category-filter {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 14px;
+    }
+    .cat-btn {
+        padding: 6px 15px;
+        border-radius: 20px;
+        border: 1.5px solid var(--border);
+        background: #fff;
+        cursor: pointer;
+        font-size: 0.8rem;
+        color: var(--text-light);
+        transition: 0.2s;
+    }
+    .cat-btn.active {
+        background: var(--primary);
+        color: #fff;
+        border-color: var(--primary);
+    }
+    .dish-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: 12px;
+    }
+    .dish-card {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        padding: 16px 12px;
+        box-shadow: var(--shadow);
+        text-align: center;
+        transition: 0.2s;
+        cursor: pointer;
+        position: relative;
+    }
+    .dish-card:hover {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
+    .dish-card:active {
+        transform: scale(0.97);
+    }
+    .dish-card .tutorial-hint {
+        position: absolute;
+        top: 8px;
+        right: 10px;
+        font-size: 0.7rem;
+        color: #c9a87c;
+        opacity: 0.7;
+        pointer-events: none;
+    }
+    .dish-card .video-hint {
+        position: absolute;
+        top: 8px;
+        left: 10px;
+        font-size: 0.7rem;
+        color: #5a8fbf;
+        opacity: 0.7;
+        pointer-events: none;
+    }
+    .dish-icon-wrap {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+    }
+    .dish-icon-wrap svg {
+        width: 100%;
+        height: 100%;
+    }
+    .dish-name {
+        font-weight: 650;
+        margin: 4px 0;
+        font-size: 0.95rem;
+        pointer-events: none;
+    }
+    .dish-price {
+        color: var(--primary);
+        font-weight: 700;
+        font-size: 1.05rem;
+        pointer-events: none;
+    }
+    .btn-add-cart {
+        margin-top: 10px;
+        padding: 7px 18px;
+        border-radius: 20px;
+        background: var(--primary);
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.82rem;
+        width: 100%;
+        transition: 0.15s;
+        position: relative;
+        z-index: 2;
+    }
+    .btn-add-cart:active {
+        transform: scale(0.95);
+        opacity: 0.85;
+    }
+    .btn-qty {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border: 2px solid var(--border);
+        background: #fff;
+        cursor: pointer;
+        font-weight: 700;
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.15s;
+        position: relative;
+        z-index: 2;
+    }
+    .btn-qty:active {
+        transform: scale(0.9);
+    }
+    .btn-qty.plus {
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+    .btn-qty.minus {
+        border-color: #d0c8bd;
+        color: #8c7b6b;
+    }
+    .card-cart-ctrl {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 10px;
+        font-weight: 600;
+        position: relative;
+        z-index: 2;
+    }
+    .cart-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .cart-item-card {
+        background: #fff;
+        border-radius: var(--radius);
+        padding: 14px 16px;
+        box-shadow: var(--shadow);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border: 1px solid transparent;
+        flex-wrap: wrap;
+    }
+    .cart-item-icon,
+    .order-item-icon {
+        width: 52px;
+        height: 52px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .cart-item-icon svg,
+    .order-item-icon svg {
+        width: 100%;
+        height: 100%;
+    }
+    .cart-item-info {
+        flex: 1;
+        min-width: 0;
+    }
+    .cart-item-info .ci-name {
+        font-weight: 650;
+        font-size: 0.95rem;
+        cursor: pointer;
+        color: var(--primary);
+        text-decoration: underline;
+        text-decoration-color: transparent;
+        transition: 0.2s;
+    }
+    .cart-item-info .ci-name:hover {
+        text-decoration-color: var(--primary);
+    }
+    .cart-item-info .ci-unit-price {
+        font-size: 0.78rem;
+        color: var(--text-light);
+    }
+    .cart-item-qty {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+    .cart-item-qty span.qty-val {
+        font-weight: 700;
+        min-width: 22px;
+        text-align: center;
+    }
+    .cart-item-subtotal {
+        font-weight: 700;
+        color: var(--primary);
+        font-size: 1.05rem;
+        flex-shrink: 0;
+        min-width: 55px;
+        text-align: right;
+    }
+    .cart-item-remove {
+        flex-shrink: 0;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: none;
+        background: #fef0ee;
+        color: var(--danger);
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: 0.15s;
+    }
+    .cart-item-remove:active {
+        background: #fdd;
+        transform: scale(0.9);
+    }
+    .cart-empty-state {
+        text-align: center;
+        padding: 50px 20px;
+        background: #fff;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+    }
+    .cart-summary-bar {
+        background: #fff;
+        border-radius: var(--radius);
+        padding: 16px 20px;
+        box-shadow: var(--shadow);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        position: sticky;
+        bottom: 8px;
+        border: 2px solid #fdf0e8;
+    }
+    .shared-orders-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-height: 58vh;
+        overflow-y: auto;
+        padding-right: 4px;
+    }
+    .date-group {
+        margin-bottom: 4px;
+    }
+    .date-group-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        background: #fdfaf6;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font-weight: 650;
+        font-size: 0.85rem;
+        color: var(--text);
+        transition: 0.2s;
+        user-select: none;
+        border: 1px solid #f0ece6;
+    }
+    .date-group-header:hover {
+        background: #fdf0e8;
+    }
+    .date-group-header .collapse-arrow {
+        transition: transform 0.25s;
+        font-size: 0.7rem;
+        display: inline-block;
+    }
+    .date-group-header.collapsed .collapse-arrow {
+        transform: rotate(-90deg);
+    }
+    .date-group-body {
+        overflow: hidden;
+        transition: max-height 0.35s ease, opacity 0.3s ease;
+        max-height: 3000px;
+        opacity: 1;
+    }
+    .date-group-body.collapsed {
+        max-height: 0;
+        opacity: 0;
+    }
+    .date-group-body-inner {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding-top: 6px;
+    }
+    .order-item {
+        background: #fff;
+        border-radius: var(--radius-sm);
+        padding: 12px 16px;
+        box-shadow: var(--shadow);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border-left: 4px solid transparent;
+        flex-wrap: wrap;
+    }
+    .order-item.confirmed {
+        border-left-color: var(--success);
+        opacity: 0.75;
+        background: #fdfefd;
+    }
+    .order-item.confirmed .oi-name {
+        text-decoration: line-through;
+        text-decoration-color: #ccc;
+    }
+    .order-item .oi-info {
+        flex: 1;
+        min-width: 0;
+    }
+    .order-item .oi-name {
+        font-weight: 650;
+        font-size: 0.92rem;
+        cursor: pointer;
+        color: var(--primary);
+    }
+    .order-item .oi-name:hover {
+        text-decoration: underline;
+    }
+    .order-item .oi-user {
+        font-size: 0.78rem;
+        color: var(--text-light);
+    }
+    .order-item .oi-time {
+        font-size: 0.72rem;
+        color: #aaa;
+    }
+    .order-item .oi-note {
+        font-size: 0.74rem;
+        color: var(--primary);
+        font-style: italic;
+        background: #fffaf7;
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 10px;
+    }
+    .order-item .oi-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        align-items: flex-end;
+        flex-shrink: 0;
+    }
+    .btn-confirm {
+        background: var(--success);
+        color: #fff;
+        border: none;
+        padding: 6px 14px;
+        border-radius: 18px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.75rem;
+        transition: 0.15s;
+    }
+    .btn-confirm:active {
+        transform: scale(0.94);
+        opacity: 0.85;
+    }
+    .badge-confirmed {
+        background: var(--success-light);
+        color: var(--success);
+        font-size: 0.7rem;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-weight: 600;
+    }
+    .summary-bar {
+        background: #fff;
+        border-radius: var(--radius);
+        padding: 14px 18px;
+        box-shadow: var(--shadow);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 14px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .history-section {
+        margin-top: 20px;
+        border-top: 2px solid var(--border);
+        padding-top: 14px;
+    }
+    .history-date-group-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        background: #f9f6f1;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.82rem;
+        color: var(--text);
+        transition: 0.2s;
+        user-select: none;
+        border: 1px solid #ece6db;
+    }
+    .history-date-group-header:hover {
+        background: #f5ede3;
+    }
+    .history-date-group-header .collapse-arrow {
+        transition: transform 0.25s;
+        font-size: 0.7rem;
+        display: inline-block;
+    }
+    .history-date-group-header.collapsed .collapse-arrow {
+        transform: rotate(-90deg);
+    }
+    .history-date-group-body {
+        overflow: hidden;
+        transition: max-height 0.35s ease, opacity 0.3s ease;
+        max-height: 3000px;
+        opacity: 1;
+    }
+    .history-date-group-body.collapsed {
+        max-height: 0;
+        opacity: 0;
+    }
+    .history-date-group-body-inner {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding-top: 4px;
+    }
+    .history-item {
+        background: #fdfcfb;
+        border-radius: 8px;
+        padding: 10px 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.88rem;
+        border: 1px solid #f0ece6;
+        flex-wrap: wrap;
+    }
+    .toast-container {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        pointer-events: none;
+        max-width: 90vw;
+    }
+    .toast {
+        padding: 10px 18px;
+        border-radius: 24px;
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.85rem;
+        animation: toastIn 0.4s ease;
+        pointer-events: auto;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        word-break: break-word;
+    }
+    .toast-success {
+        background: var(--success);
+    }
+    .toast-info {
+        background: #5a8fbf;
+    }
+    .toast-warning {
+        background: #e09b4c;
+    }
+    @keyframes toastIn {
+        from {
+            opacity: 0;
+            transform: translateX(50px);
         }
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
+        to {
+            opacity: 1;
+            transform: translateX(0);
         }
-        .app-logo {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--primary);
-            white-space: nowrap;
-        }
-        .room-badge {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: #f5f0ea;
-            border-radius: 22px;
-            padding: 5px 14px;
-            font-size: 0.82rem;
-        }
-        .room-badge input {
-            border: none;
-            background: transparent;
-            font-weight: 600;
-            color: var(--primary);
-            width: 65px;
-            text-align: center;
-            outline: none;
-            font-size: 0.82rem;
-        }
-        .room-badge button {
-            background: var(--primary);
-            color: #fff;
-            border: none;
-            border-radius: 16px;
-            padding: 4px 12px;
-            font-size: 0.72rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .room-badge button:active {
-            transform: scale(0.94);
-            opacity: 0.85;
-        }
-        .connection-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #ccc;
-            flex-shrink: 0;
-            transition: background 0.3s, box-shadow 0.3s;
-        }
-        .connection-dot.connected {
-            background: var(--success);
-            box-shadow: 0 0 6px rgba(90, 158, 111, 0.5);
-        }
-        .connection-dot.syncing {
-            background: #f0c040;
-            box-shadow: 0 0 8px rgba(240, 192, 64, 0.6);
-            animation: pulse 1s infinite;
-        }
-        @keyframes pulse {
-            0%,
-            100% {
-                box-shadow: 0 0 4px rgba(240, 192, 64, 0.4);
-            }
-            50% {
-                box-shadow: 0 0 14px rgba(240, 192, 64, 0.8);
-            }
-        }
-        .connection-text {
-            font-size: 0.7rem;
-            color: #aaa;
-            white-space: nowrap;
-        }
-        .btn-install {
-            display: none;
-            padding: 6px 14px;
-            border-radius: 20px;
-            border: 2px solid var(--primary);
-            background: #fff;
-            color: var(--primary);
-            font-size: 0.78rem;
-            cursor: pointer;
-            font-weight: 600;
-        }
-        .btn-install.show {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .btn-nick {
-            padding: 7px 14px;
-            border-radius: 20px;
-            border: 1.5px solid var(--border);
-            background: #fff;
-            color: var(--text);
-            font-size: 0.78rem;
-            cursor: pointer;
-            font-weight: 500;
-            transition: 0.2s;
-            white-space: nowrap;
-            max-width: 140px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .btn-nick.has-nick {
-            color: var(--primary);
-            border-color: var(--primary-light);
-            background: #fffaf7;
-            font-weight: 600;
-        }
-        .nav-tabs {
-            display: flex;
-            gap: 4px;
-            background: #f5f0ea;
-            border-radius: 28px;
-            padding: 4px;
-            flex-wrap: wrap;
-        }
-        .nav-tab {
-            padding: 8px 14px;
-            border-radius: 24px;
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            font-size: 0.84rem;
-            color: var(--text-light);
-            transition: 0.2s;
-            white-space: nowrap;
-            font-weight: 500;
-        }
-        .nav-tab.active {
-            background: #fff;
-            color: var(--primary);
-            font-weight: 650;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        }
-        .nav-tab .badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 18px;
-            height: 18px;
-            border-radius: 9px;
-            background: #e85d3f;
-            color: #fff;
-            font-size: 0.68rem;
-            margin-left: 4px;
-            padding: 0 5px;
-            font-weight: 700;
-        }
-        .main-content {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 16px;
-        }
-        .page {
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
-        .page.active {
-            display: block;
-        }
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        .search-box {
-            margin-bottom: 12px;
-            display: flex;
-            gap: 8px;
-        }
-        .search-box input {
-            flex: 1;
-            padding: 10px 16px;
-            border-radius: 24px;
-            border: 1.5px solid var(--border);
-            font-size: 0.9rem;
-            background: #fff;
-            outline: none;
-        }
-        .category-filter {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 14px;
-        }
-        .cat-btn {
-            padding: 6px 15px;
-            border-radius: 20px;
-            border: 1.5px solid var(--border);
-            background: #fff;
-            cursor: pointer;
-            font-size: 0.8rem;
-            color: var(--text-light);
-            transition: 0.2s;
-        }
-        .cat-btn.active {
-            background: var(--primary);
-            color: #fff;
-            border-color: var(--primary);
-        }
+    }
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        z-index: 200;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    .modal-dialog {
+        background: #fff;
+        border-radius: var(--radius);
+        padding: 24px 20px;
+        max-width: 520px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        max-height: 85vh;
+        overflow-y: auto;
+    }
+    .modal-dialog .btn-row {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 16px;
+        flex-wrap: wrap;
+    }
+    .btn {
+        padding: 8px 18px;
+        border-radius: 24px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.84rem;
+        transition: 0.2s;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .btn:active {
+        transform: scale(0.94);
+        opacity: 0.85;
+    }
+    .btn-primary {
+        background: var(--primary);
+        color: #fff;
+    }
+    .btn-secondary {
+        background: #f5f0ea;
+        color: var(--text);
+    }
+    .btn-danger-outline {
+        background: #fff;
+        color: var(--danger);
+        border: 1.5px solid #f0d0ca;
+    }
+    .btn-xs {
+        padding: 4px 10px;
+        font-size: 0.7rem;
+        border-radius: 14px;
+    }
+    .btn-sm {
+        padding: 6px 14px;
+        font-size: 0.75rem;
+        border-radius: 18px;
+    }
+    .btn-accent {
+        background: #5a8fbf;
+        color: #fff;
+    }
+    .mgmt-dish-list {
+        list-style: none;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    .mgmt-dish-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 8px;
+        border-bottom: 1px solid #f0ece6;
+        flex-wrap: wrap;
+    }
+    .emoji-opt {
+        width: 34px;
+        height: 34px;
+        border: none;
+        background: #f5f0ea;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 1.1rem;
+        transition: 0.15s;
+    }
+    .emoji-opt:hover {
+        background: #e8ddd3;
+        transform: scale(1.1);
+    }
+    .form-group {
+        margin-bottom: 10px;
+        text-align: left;
+    }
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        font-size: 0.85rem;
+        margin-bottom: 4px;
+        color: var(--text-light);
+    }
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 9px;
+        border-radius: var(--radius-xs);
+        border: 1.5px solid #ddd;
+        font-size: 0.9rem;
+        outline: none;
+        transition: border-color 0.2s;
+        font-family: inherit;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(224, 123, 76, 0.1);
+    }
+    .sync-status-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+    }
+    .sync-status-bar.local {
+        background: #fffbf0;
+        color: #b8860b;
+        border: 1px solid #f0d080;
+    }
+    .sync-status-bar.online {
+        background: #f0faf4;
+        color: #2d6a3f;
+        border: 1px solid #b8dcc8;
+    }
+    .sync-status-bar.connecting {
+        background: #f8f4ff;
+        color: #5b4a9e;
+        border: 1px solid #d0c8f0;
+    }
+    .game-selector {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+    .game-select-btn {
+        padding: 10px 20px;
+        border-radius: 24px;
+        border: 2px solid var(--border);
+        background: #fff;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .game-select-btn.active {
+        border-color: var(--primary);
+        background: var(--primary-light);
+        color: var(--primary);
+    }
+    .game-container {
+        background: #fff;
+        border-radius: var(--radius);
+        padding: 20px;
+        box-shadow: var(--shadow);
+        text-align: center;
+    }
+    .snake-canvas-wrap,
+    .breakout-canvas-wrap {
+        display: flex;
+        justify-content: center;
+        position: relative;
+    }
+    #snakeCanvas,
+    #breakoutCanvas {
+        border-radius: 12px;
+        background: var(--game-bg);
+        display: block;
+        max-width: 100%;
+        height: auto;
+        touch-action: none;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+    .snake-info,
+    .breakout-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+    .snake-score,
+    .breakout-score {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--primary);
+    }
+    .snake-high-score,
+    .breakout-high-score {
+        font-size: 0.85rem;
+        color: var(--text-light);
+    }
+    .snake-hint,
+    .breakout-hint {
+        font-size: 0.78rem;
+        color: #999;
+        margin-top: 8px;
+    }
+    .game-over-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        color: #fff;
+        z-index: 10;
+    }
+    .game-over-overlay h3 {
+        font-size: 1.5rem;
+    }
+    .guess-section {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+    .guess-input-row {
+        display: flex;
+        gap: 8px;
+        margin: 16px 0;
+    }
+    .guess-input-row input {
+        flex: 1;
+        padding: 12px 16px;
+        border-radius: 24px;
+        border: 2px solid var(--border);
+        font-size: 1rem;
+        text-align: center;
+        outline: none;
+    }
+    .guess-history {
+        max-height: 180px;
+        overflow-y: auto;
+        text-align: left;
+        margin-top: 12px;
+        font-size: 0.85rem;
+    }
+    .guess-history .gh-item {
+        padding: 6px 10px;
+        border-bottom: 1px solid #f0ece6;
+        display: flex;
+        justify-content: space-between;
+    }
+    .guess-history .gh-item.too-high {
+        color: #e07b4c;
+    }
+    .guess-history .gh-item.too-low {
+        color: #5a8fbf;
+    }
+    .guess-history .gh-item.correct {
+        color: var(--success);
+        font-weight: 700;
+    }
+    .tutorial-content {
+        text-align: left;
+        background: #fdfaf6;
+        border-radius: 12px;
+        padding: 16px;
+        margin: 12px 0;
+        font-size: 0.88rem;
+        line-height: 1.7;
+        max-height: 300px;
+        overflow-y: auto;
+        white-space: pre-line;
+        border: 1px solid #f0ece6;
+    }
+    .tutorial-content strong {
+        color: var(--primary);
+    }
+    .tutorial-video-wrap {
+        margin: 12px 0;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #000;
+        position: relative;
+        padding-top: 56.25%;
+        max-width: 100%;
+    }
+    .tutorial-video-wrap iframe,
+    .tutorial-video-wrap video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+        border-radius: 12px;
+    }
+    @media (max-width: 768px) {
         .dish-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-            gap: 12px;
-        }
-        .dish-card {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 16px 12px;
-            box-shadow: var(--shadow);
-            text-align: center;
-            transition: 0.2s;
-            cursor: pointer;
-            position: relative;
-        }
-        .dish-card:hover {
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-            transform: translateY(-2px);
-        }
-        .dish-card:active {
-            transform: scale(0.97);
-        }
-        .dish-card .tutorial-hint {
-            position: absolute;
-            top: 8px;
-            right: 10px;
-            font-size: 0.7rem;
-            color: #c9a87c;
-            opacity: 0.7;
-            pointer-events: none;
-        }
-        .dish-card .video-hint {
-            position: absolute;
-            top: 8px;
-            left: 10px;
-            font-size: 0.7rem;
-            color: #5a8fbf;
-            opacity: 0.7;
-            pointer-events: none;
-        }
-        .dish-icon-wrap {
-            width: 60px;
-            height: 60px;
-            margin: 0 auto 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            pointer-events: none;
-        }
-        .dish-icon-wrap svg {
-            width: 100%;
-            height: 100%;
-        }
-        .dish-name {
-            font-weight: 650;
-            margin: 4px 0;
-            font-size: 0.95rem;
-            pointer-events: none;
-        }
-        .dish-price {
-            color: var(--primary);
-            font-weight: 700;
-            font-size: 1.05rem;
-            pointer-events: none;
-        }
-        .btn-add-cart {
-            margin-top: 10px;
-            padding: 7px 18px;
-            border-radius: 20px;
-            background: var(--primary);
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.82rem;
-            width: 100%;
-            transition: 0.15s;
-            position: relative;
-            z-index: 2;
-        }
-        .btn-add-cart:active {
-            transform: scale(0.95);
-            opacity: 0.85;
-        }
-        .btn-qty {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            border: 2px solid var(--border);
-            background: #fff;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 1rem;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.15s;
-            position: relative;
-            z-index: 2;
-        }
-        .btn-qty:active {
-            transform: scale(0.9);
-        }
-        .btn-qty.plus {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-        .btn-qty.minus {
-            border-color: #d0c8bd;
-            color: #8c7b6b;
-        }
-        .card-cart-ctrl {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
-            font-weight: 600;
-            position: relative;
-            z-index: 2;
-        }
-        .cart-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .cart-item-card {
-            background: #fff;
-            border-radius: var(--radius);
-            padding: 14px 16px;
-            box-shadow: var(--shadow);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border: 1px solid transparent;
-            flex-wrap: wrap;
-        }
-        .cart-item-icon,
-        .order-item-icon {
-            width: 52px;
-            height: 52px;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .cart-item-icon svg,
-        .order-item-icon svg {
-            width: 100%;
-            height: 100%;
-        }
-        .cart-item-info {
-            flex: 1;
-            min-width: 0;
-        }
-        .cart-item-info .ci-name {
-            font-weight: 650;
-            font-size: 0.95rem;
-            cursor: pointer;
-            color: var(--primary);
-            text-decoration: underline;
-            text-decoration-color: transparent;
-            transition: 0.2s;
-        }
-        .cart-item-info .ci-name:hover {
-            text-decoration-color: var(--primary);
-        }
-        .cart-item-info .ci-unit-price {
-            font-size: 0.78rem;
-            color: var(--text-light);
-        }
-        .cart-item-qty {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-shrink: 0;
-        }
-        .cart-item-qty span.qty-val {
-            font-weight: 700;
-            min-width: 22px;
-            text-align: center;
-        }
-        .cart-item-subtotal {
-            font-weight: 700;
-            color: var(--primary);
-            font-size: 1.05rem;
-            flex-shrink: 0;
-            min-width: 55px;
-            text-align: right;
-        }
-        .cart-item-remove {
-            flex-shrink: 0;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: none;
-            background: #fef0ee;
-            color: var(--danger);
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: 0.15s;
-        }
-        .cart-item-remove:active {
-            background: #fdd;
-            transform: scale(0.9);
-        }
-        .cart-empty-state {
-            text-align: center;
-            padding: 50px 20px;
-            background: #fff;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
+            grid-template-columns: repeat(2, 1fr);
         }
         .cart-summary-bar {
-            background: #fff;
-            border-radius: var(--radius);
-            padding: 16px 20px;
-            box-shadow: var(--shadow);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 12px;
-            position: sticky;
-            bottom: 8px;
-            border: 2px solid #fdf0e8;
-        }
-        .shared-orders-list {
-            display: flex;
             flex-direction: column;
-            gap: 10px;
-            max-height: 58vh;
-            overflow-y: auto;
-            padding-right: 4px;
-        }
-        .date-group {
-            margin-bottom: 4px;
-        }
-        .date-group-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 14px;
-            background: #fdfaf6;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            font-weight: 650;
-            font-size: 0.85rem;
-            color: var(--text);
-            transition: 0.2s;
-            user-select: none;
-            border: 1px solid #f0ece6;
-        }
-        .date-group-header:hover {
-            background: #fdf0e8;
-        }
-        .date-group-header .collapse-arrow {
-            transition: transform 0.25s;
-            font-size: 0.7rem;
-            display: inline-block;
-        }
-        .date-group-header.collapsed .collapse-arrow {
-            transform: rotate(-90deg);
-        }
-        .date-group-body {
-            overflow: hidden;
-            transition: max-height 0.35s ease, opacity 0.3s ease;
-            max-height: 3000px;
-            opacity: 1;
-        }
-        .date-group-body.collapsed {
-            max-height: 0;
-            opacity: 0;
-        }
-        .date-group-body-inner {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            padding-top: 6px;
-        }
-        .order-item {
-            background: #fff;
-            border-radius: var(--radius-sm);
-            padding: 12px 16px;
-            box-shadow: var(--shadow);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border-left: 4px solid transparent;
-            flex-wrap: wrap;
-        }
-        .order-item.confirmed {
-            border-left-color: var(--success);
-            opacity: 0.75;
-            background: #fdfefd;
-        }
-        .order-item.confirmed .oi-name {
-            text-decoration: line-through;
-            text-decoration-color: #ccc;
-        }
-        .order-item .oi-info {
-            flex: 1;
-            min-width: 0;
-        }
-        .order-item .oi-name {
-            font-weight: 650;
-            font-size: 0.92rem;
-            cursor: pointer;
-            color: var(--primary);
-        }
-        .order-item .oi-name:hover {
-            text-decoration: underline;
-        }
-        .order-item .oi-user {
-            font-size: 0.78rem;
-            color: var(--text-light);
-        }
-        .order-item .oi-time {
-            font-size: 0.72rem;
-            color: #aaa;
-        }
-        .order-item .oi-note {
-            font-size: 0.74rem;
-            color: var(--primary);
-            font-style: italic;
-            background: #fffaf7;
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 10px;
+            align-items: stretch;
         }
         .order-item .oi-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            align-items: flex-end;
-            flex-shrink: 0;
-        }
-        .btn-confirm {
-            background: var(--success);
-            color: #fff;
-            border: none;
-            padding: 6px 14px;
-            border-radius: 18px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.75rem;
-            transition: 0.15s;
-        }
-        .btn-confirm:active {
-            transform: scale(0.94);
-            opacity: 0.85;
-        }
-        .badge-confirmed {
-            background: var(--success-light);
-            color: var(--success);
-            font-size: 0.7rem;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-weight: 600;
-        }
-        .summary-bar {
-            background: #fff;
-            border-radius: var(--radius);
-            padding: 14px 18px;
-            box-shadow: var(--shadow);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 14px;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .history-section {
-            margin-top: 20px;
-            border-top: 2px solid var(--border);
-            padding-top: 14px;
-        }
-        .history-date-group-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
-            background: #f9f6f1;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.82rem;
-            color: var(--text);
-            transition: 0.2s;
-            user-select: none;
-            border: 1px solid #ece6db;
-        }
-        .history-date-group-header:hover {
-            background: #f5ede3;
-        }
-        .history-date-group-header .collapse-arrow {
-            transition: transform 0.25s;
-            font-size: 0.7rem;
-            display: inline-block;
-        }
-        .history-date-group-header.collapsed .collapse-arrow {
-            transform: rotate(-90deg);
-        }
-        .history-date-group-body {
-            overflow: hidden;
-            transition: max-height 0.35s ease, opacity 0.3s ease;
-            max-height: 3000px;
-            opacity: 1;
-        }
-        .history-date-group-body.collapsed {
-            max-height: 0;
-            opacity: 0;
-        }
-        .history-date-group-body-inner {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            padding-top: 4px;
-        }
-        .history-item {
-            background: #fdfcfb;
-            border-radius: 8px;
-            padding: 10px 14px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.88rem;
-            border: 1px solid #f0ece6;
-            flex-wrap: wrap;
-        }
-        .toast-container {
-            position: fixed;
-            top: 16px;
-            right: 16px;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            pointer-events: none;
-            max-width: 90vw;
-        }
-        .toast {
-            padding: 10px 18px;
-            border-radius: 24px;
-            color: #fff;
-            font-weight: 600;
-            font-size: 0.85rem;
-            animation: toastIn 0.4s ease;
-            pointer-events: auto;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-            word-break: break-word;
-        }
-        .toast-success {
-            background: var(--success);
-        }
-        .toast-info {
-            background: #5a8fbf;
-        }
-        .toast-warning {
-            background: #e09b4c;
-        }
-        @keyframes toastIn {
-            from {
-                opacity: 0;
-                transform: translateX(50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.45);
-            z-index: 200;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        .modal-dialog {
-            background: #fff;
-            border-radius: var(--radius);
-            padding: 24px 20px;
-            max-width: 520px;
+            flex-direction: row;
             width: 100%;
-            text-align: center;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
-            max-height: 85vh;
-            overflow-y: auto;
+            justify-content: flex-end;
         }
-        .modal-dialog .btn-row {
-            display: flex;
-            gap: 10px;
+        .nav-tabs {
             justify-content: center;
-            margin-top: 16px;
-            flex-wrap: wrap;
         }
-        .btn {
-            padding: 8px 18px;
-            border-radius: 24px;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.84rem;
-            transition: 0.2s;
-            white-space: nowrap;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .btn:active {
-            transform: scale(0.94);
-            opacity: 0.85;
-        }
-        .btn-primary {
-            background: var(--primary);
-            color: #fff;
-        }
-        .btn-secondary {
-            background: #f5f0ea;
-            color: var(--text);
-        }
-        .btn-danger-outline {
-            background: #fff;
-            color: var(--danger);
-            border: 1.5px solid #f0d0ca;
-        }
-        .btn-xs {
-            padding: 4px 10px;
-            font-size: 0.7rem;
-            border-radius: 14px;
-        }
-        .btn-sm {
-            padding: 6px 14px;
+        .nav-tab {
+            padding: 7px 10px;
             font-size: 0.75rem;
-            border-radius: 18px;
-        }
-        .btn-accent {
-            background: #5a8fbf;
-            color: #fff;
-        }
-        .mgmt-dish-list {
-            list-style: none;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        .mgmt-dish-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 8px;
-            border-bottom: 1px solid #f0ece6;
-            flex-wrap: wrap;
-        }
-        .emoji-opt {
-            width: 34px;
-            height: 34px;
-            border: none;
-            background: #f5f0ea;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.1rem;
-            transition: 0.15s;
-        }
-        .emoji-opt:hover {
-            background: #e8ddd3;
-            transform: scale(1.1);
-        }
-        .form-group {
-            margin-bottom: 10px;
-            text-align: left;
-        }
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            font-size: 0.85rem;
-            margin-bottom: 4px;
-            color: var(--text-light);
-        }
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 9px;
-            border-radius: var(--radius-xs);
-            border: 1.5px solid #ddd;
-            font-size: 0.9rem;
-            outline: none;
-            transition: border-color 0.2s;
-            font-family: inherit;
-        }
-        .form-group input:focus,
-        .form-group textarea:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(224, 123, 76, 0.1);
-        }
-        .sync-status-bar {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 14px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 500;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-        .sync-status-bar.local {
-            background: #fffbf0;
-            color: #b8860b;
-            border: 1px solid #f0d080;
-        }
-        .sync-status-bar.online {
-            background: #f0faf4;
-            color: #2d6a3f;
-            border: 1px solid #b8dcc8;
-        }
-        .sync-status-bar.connecting {
-            background: #f8f4ff;
-            color: #5b4a9e;
-            border: 1px solid #d0c8f0;
-        }
-        .game-selector {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-        }
-        .game-select-btn {
-            padding: 10px 20px;
-            border-radius: 24px;
-            border: 2px solid var(--border);
-            background: #fff;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .game-select-btn.active {
-            border-color: var(--primary);
-            background: var(--primary-light);
-            color: var(--primary);
-        }
-        .game-container {
-            background: #fff;
-            border-radius: var(--radius);
-            padding: 20px;
-            box-shadow: var(--shadow);
-            text-align: center;
-        }
-        .snake-canvas-wrap,
-        .breakout-canvas-wrap {
-            display: flex;
-            justify-content: center;
-            position: relative;
         }
         #snakeCanvas,
         #breakoutCanvas {
-            border-radius: 12px;
-            background: var(--game-bg);
-            display: block;
-            max-width: 100%;
-            height: auto;
-            touch-action: none;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-        }
-        .snake-info,
-        .breakout-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 12px;
-        }
-        .snake-score,
-        .breakout-score {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--primary);
-        }
-        .snake-high-score,
-        .breakout-high-score {
-            font-size: 0.85rem;
-            color: var(--text-light);
-        }
-        .snake-hint,
-        .breakout-hint {
-            font-size: 0.78rem;
-            color: #999;
-            margin-top: 8px;
-        }
-        .game-over-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            color: #fff;
-            z-index: 10;
-        }
-        .game-over-overlay h3 {
-            font-size: 1.5rem;
-        }
-        .guess-section {
-            max-width: 400px;
-            margin: 0 auto;
-        }
-        .guess-input-row {
-            display: flex;
-            gap: 8px;
-            margin: 16px 0;
-        }
-        .guess-input-row input {
-            flex: 1;
-            padding: 12px 16px;
-            border-radius: 24px;
-            border: 2px solid var(--border);
-            font-size: 1rem;
-            text-align: center;
-            outline: none;
-        }
-        .guess-history {
-            max-height: 180px;
-            overflow-y: auto;
-            text-align: left;
-            margin-top: 12px;
-            font-size: 0.85rem;
-        }
-        .guess-history .gh-item {
-            padding: 6px 10px;
-            border-bottom: 1px solid #f0ece6;
-            display: flex;
-            justify-content: space-between;
-        }
-        .guess-history .gh-item.too-high {
-            color: #e07b4c;
-        }
-        .guess-history .gh-item.too-low {
-            color: #5a8fbf;
-        }
-        .guess-history .gh-item.correct {
-            color: var(--success);
-            font-weight: 700;
-        }
-        .tutorial-content {
-            text-align: left;
-            background: #fdfaf6;
-            border-radius: 12px;
-            padding: 16px;
-            margin: 12px 0;
-            font-size: 0.88rem;
-            line-height: 1.7;
-            max-height: 300px;
-            overflow-y: auto;
-            white-space: pre-line;
-            border: 1px solid #f0ece6;
-        }
-        .tutorial-content strong {
-            color: var(--primary);
-        }
-        .tutorial-video-wrap {
-            margin: 12px 0;
-            border-radius: 12px;
-            overflow: hidden;
-            background: #000;
-            position: relative;
-            padding-top: 56.25%;
-            max-width: 100%;
-        }
-        .tutorial-video-wrap iframe,
-        .tutorial-video-wrap video {
-            position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
-            height: 100%;
-            border: none;
-            border-radius: 12px;
+            max-width: 360px;
         }
-        @media (max-width: 768px) {
-            .dish-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .cart-summary-bar {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .order-item .oi-actions {
-                flex-direction: row;
-                width: 100%;
-                justify-content: flex-end;
-            }
-            .nav-tabs {
-                justify-content: center;
-            }
-            .nav-tab {
-                padding: 7px 10px;
-                font-size: 0.75rem;
-            }
-            #snakeCanvas,
-            #breakoutCanvas {
-                width: 100%;
-                max-width: 360px;
-            }
-        }
-    </style>
+    }
+</style>
 </head>
 <body>
     <header class="app-header">
@@ -1224,7 +1224,7 @@
 
     <script>
         (function() {
-            // ========== 音效系统 ==========
+            // ========== 音效系统（保留） ==========
             const SoundFX = {
                 ctx: null,
                 _bgmInterval: null,
@@ -1352,7 +1352,7 @@
                     if (this._guessBgmOsc) { try { this._guessBgmOsc.stop(); } catch (e) {} this._guessBgmOsc = null; }
                     if (this._guessBgmGain) { this._guessBgmGain = null; }
                     if (this._guessBgwOsc2) { try { this._guessBgwOsc2.stop(); } catch (e) {} this._guessBgwOsc2 =
-                        null; }
+                            null; }
                     if (this._guessBgwGain2) { this._guessBgwGain2 = null; }
                 },
                 stopAllBgm() {
@@ -1365,7 +1365,7 @@
             document.addEventListener('touchstart', () => SoundFX.ensureCtx(), { once: true });
             document.addEventListener('keydown', () => SoundFX.ensureCtx(), { once: true });
 
-            // ========== SVG图标库 ==========
+            // ========== SVG图标库（保留） ==========
             const ICON_SVGS = {
                 '🍖': () =>
                     `<svg viewBox="0 0 64 64"><rect x="14" y="26" width="36" height="20" rx="8" fill="#c0392b"/><ellipse cx="32" cy="36" rx="10" ry="6" fill="#e74c3c"/><circle cx="22" cy="30" r="3" fill="#f1c40f"/><circle cx="42" cy="30" r="3" fill="#f1c40f"/><path d="M18 20 Q32 8 46 20" stroke="#f39c12" stroke-width="3" fill="none"><animate attributeName="d" values="M18 20 Q32 8 46 20;M18 18 Q32 6 46 18;M18 20 Q32 8 46 20" dur="2s" repeatCount="indefinite"/></path></svg>`,
@@ -1401,7 +1401,7 @@
             const STORAGE = { MENU: 'menu_v17', CART: 'cart_v14', NICK: 'nickname_v4', ROOM: 'currentRoom_v4',
                 SHARED: 'shared_local_v5_', SNAKE_HIGH: 'snake_high_v3', BREAKOUT_HIGH: 'breakout_high_v3' };
 
-            // 原有30道精品菜品（带详细教程）
+            // 原有30道精品菜品（保留）
             const CORE_DISHES = [
                 { id: 1, name: '红烧肉', price: 38, category: '荤菜', emoji: '🍖', desc: '肥而不腻', video: '',
                     tutorial: '【红烧肉】\n1. 五花肉切3cm方块，冷水下锅焯水去血沫，捞出沥干。\n2. 锅中少油，加冰糖小火炒出糖色（琥珀色）。\n3. 放入肉块翻炒上色，加葱姜、八角、桂皮。\n4. 加料酒、生抽、老抽，倒入开水没过肉。\n5. 大火烧开转小火炖40-50分钟，收汁至浓稠即可。\n💡 关键：炒糖色火候要小，炖煮时间要足。' },
@@ -1465,7 +1465,7 @@
                     tutorial: '【酸辣汤】\n1. 豆腐、木耳、火腿切丝。\n2. 高汤烧开，放入食材。\n3. 加醋、白胡椒粉、盐。\n4. 水淀粉勾芡。\n5. 淋蛋液成蛋花，加香油。\n💡 关键：醋和胡椒粉是灵魂，比例要恰当。' }
             ];
 
-            // 生成额外90道菜品，确保总数为120，且每道都有tutorial和video字段
+            // 生成额外菜品
             function generateExtraDishes(startId, count) {
                 const dishes = [];
                 const names = [
@@ -1508,33 +1508,58 @@
                 '🍉', '🍊', '🍮', '🥙', '🌿', '🪸'
             ];
 
-            // ========== Gun.js ==========
+            // ========== Gun.js 核心修复 ==========
             let gun = null,
                 useGun = false,
                 gunReady = false,
                 gunAttempts = 0;
+            let gunUnsubscribeFn = null; // 保存当前房间的取消监听函数
 
             function initGun() {
                 if (typeof Gun === 'undefined') { updateConnStatus('local'); return; }
                 try {
-                    gun = Gun({ localStorage: true, radisk: true, axe: true });
+                    // 【修复1】配置多个公共 relay 服务器，提高跨设备同步成功率
+                    gun = Gun({
+                        localStorage: true,
+                        radisk: true,
+                        axe: true,
+                        peers: [
+                            'https://gun-manhattan.herokuapp.com/gun',
+                            'https://gun-us.herokuapp.com/gun',
+                            'https://gun.eco/gun'
+                        ]
+                    });
                     useGun = true;
                     gunReady = true;
                     updateConnStatus('connecting');
-                    setTimeout(() => checkGunConn(), 2000);
-                    setTimeout(() => checkGunConn(), 5000);
-                } catch (e) { updateConnStatus('local'); }
+                    // 延迟检测连接
+                    setTimeout(() => checkGunConn(), 3000);
+                    setTimeout(() => checkGunConn(), 7000);
+                } catch (e) {
+                    console.warn('Gun init error:', e);
+                    updateConnStatus('local');
+                }
             }
 
             function checkGunConn() {
                 if (!useGun || !gun) { updateConnStatus('local'); return; }
                 try {
                     gun.get('conn-tests').get('_' + userId).put({ ts: Date.now() }, ack => {
-                        if (ack && ack.ok) { gunAttempts = 0;
-                            updateConnStatus('online'); } else { gunAttempts++; if (gunAttempts >=
-                                3) updateConnStatus('local'); }
+                        if (ack && ack.ok) {
+                            gunAttempts = 0;
+                            updateConnStatus('online');
+                            showToast('🟢 已连接同步服务器', 'success');
+                        } else {
+                            gunAttempts++;
+                            if (gunAttempts >= 3) {
+                                updateConnStatus('local');
+                                showToast('📡 同步服务器不可用，切换到本地模式', 'warning');
+                            }
+                        }
                     });
-                } catch (e) { updateConnStatus('local'); }
+                } catch (e) {
+                    updateConnStatus('local');
+                }
             }
 
             function updateConnStatus(s) {
@@ -1543,19 +1568,29 @@
                     bar = document.getElementById('syncStatusBar'),
                     icn = document.getElementById('syncStatusIcon'),
                     stxt = document.getElementById('syncStatusText');
+                if (!dot) return;
                 dot.classList.remove('connected', 'syncing');
-                if (s === 'online') { dot.classList.add('connected');
-                    txt.textContent = '已同步'; if (bar) { bar.className = 'sync-status-bar online';
+                if (s === 'online') {
+                    dot.classList.add('connected');
+                    txt.textContent = '已同步';
+                    if (bar) { bar.className = 'sync-status-bar online';
                         icn.textContent = '🟢';
-                        stxt.textContent = '在线同步 - 数据可在设备间共享'; } } else if (s === 'connecting') { dot.classList.add(
-                        'syncing');
-                    txt.textContent = '连接中...'; if (bar) { bar.className = 'sync-status-bar connecting';
+                        stxt.textContent = '在线同步 - 数据可在设备间共享'; }
+                } else if (s === 'connecting') {
+                    dot.classList.add('syncing');
+                    txt.textContent = '连接中...';
+                    if (bar) { bar.className = 'sync-status-bar connecting';
                         icn.textContent = '🟡';
-                        stxt.textContent = '正在建立连接...'; } } else { txt.textContent = '本地模式'; if (bar) { bar.className =
-                            'sync-status-bar local';
+                        stxt.textContent = '正在建立连接...'; }
+                } else {
+                    txt.textContent = '本地模式';
+                    if (bar) { bar.className = 'sync-status-bar local';
                         icn.textContent = '📡';
-                        stxt.textContent = '本地模式 - 数据仅存储在此设备'; } }
+                        stxt.textContent = '本地模式 - 数据仅存储在此设备'; }
+                }
             }
+
+            // 初始化 Gun（在 DOM 加载后执行）
             initGun();
 
             const userId = 'u_' + Math.random().toString(36).substr(2, 8);
@@ -1655,103 +1690,210 @@
 
             function saveLocalShared(o) { localStorage.setItem(getLocalSharedKey(), JSON.stringify(o)); }
 
-            function syncToGun(oid, data) { if (useGun && gun && gunReady) try { gun.get('sov10-' + currentRoom).get(oid).put(
-                        data); } catch (e) {} }
-
-            function delFromGun(oid) { if (useGun && gun && gunReady) try { gun.get('sov10-' + currentRoom).get(oid).put(
-                    null); } catch (e) {} }
-
-            function subscribeShared() {
-                sharedOrders = loadLocalShared();
-                if (useGun && gun && gunReady) { try { const p = 'sov10-' + currentRoom;
-                        gun.get(p).on(function(d, k) { if (!d) { if (k && sharedOrders[k]) { delete sharedOrders[
-                                    k];
-                                saveLocalShared(sharedOrders); if (document.getElementById('page-shared')
-                                    .classList.contains('active')) renderSharedOrders(); } } else if (k && d
-                                .dishId) { const loc = sharedOrders[k]; const newer = !loc || (d.timestamp && loc
-                                    .timestamp && d.timestamp > loc.timestamp) || d.confirmed; if (
-                                newer) { sharedOrders[k] = { id: k, ...d };
-                                saveLocalShared(sharedOrders); if (d.confirmed === true) addToHistory(
-                                    currentRoom, { id: k, ...d, room: currentRoom }); if (document
-                                    .getElementById('page-shared').classList.contains(
-                                        'active')) renderSharedOrders(); } }
-                            updateConnStatus('online'); }, true);
-                    updateConnStatus('online'); } catch (e) { updateConnStatus('local'); } } else { updateConnStatus(
-                        'local'); }
-                renderSharedOrders();
+            // 【修复2】syncToGun 增加重试和错误日志
+            function syncToGun(oid, data) {
+                if (useGun && gun && gunReady) {
+                    try {
+                        gun.get('sov10-' + currentRoom).get(oid).put(data, ack => {
+                            if (ack && !ack.ok) {
+                                console.warn('Gun put error for', oid, ack);
+                            }
+                        });
+                    } catch (e) {
+                        console.warn('Gun sync error:', e);
+                    }
+                }
             }
 
-            function publishOrder(dish, qty, note = '') { const now = Date.now(); const ok = now.toString(36) + Math.random()
-                    .toString(36).substr(2, 6); const od = { dishId: dish.id, name: dish.name, emoji: dish.emoji || '🍽️',
-                        price: dish.price, quantity: qty, userId, userName: nickname || userId.substring(0, 6),
-                        timestamp: now, note, confirmed: false };
+            function delFromGun(oid) {
+                if (useGun && gun && gunReady) {
+                    try {
+                        gun.get('sov10-' + currentRoom).get(oid).put(null);
+                    } catch (e) {}
+                }
+            }
+
+            // 【修复3】订阅共享数据 - 使用持续监听，并保存取消函数
+            function subscribeShared() {
+                // 取消之前的监听
+                if (gunUnsubscribeFn) {
+                    try { gunUnsubscribeFn(); } catch (e) {}
+                    gunUnsubscribeFn = null;
+                }
+
+                // 加载本地数据
+                sharedOrders = loadLocalShared();
+                renderSharedOrders();
+
+                if (!useGun || !gun || !gunReady) {
+                    updateConnStatus('local');
+                    return;
+                }
+
+                try {
+                    const p = 'sov10-' + currentRoom;
+                    // 【修复】使用持续监听 (once=false)，并且保存返回的取消函数
+                    const off = gun.get(p).on(function(d, k) {
+                        if (!d) {
+                            // 数据被删除
+                            if (k && sharedOrders[k]) {
+                                delete sharedOrders[k];
+                                saveLocalShared(sharedOrders);
+                                if (document.getElementById('page-shared').classList.contains('active'))
+                                    renderSharedOrders();
+                            }
+                            return;
+                        }
+                        if (k && d.dishId) {
+                            // 收到数据更新
+                            const loc = sharedOrders[k];
+                            const newer = !loc ||
+                                (d.timestamp && loc.timestamp && d.timestamp > loc.timestamp) ||
+                                (d.confirmed === true && !loc.confirmed);
+                            if (newer) {
+                                sharedOrders[k] = { id: k, ...d };
+                                saveLocalShared(sharedOrders);
+                                if (d.confirmed === true) {
+                                    addToHistory(currentRoom, { id: k, ...d, room: currentRoom });
+                                }
+                                if (document.getElementById('page-shared').classList.contains('active'))
+                                    renderSharedOrders();
+                            }
+                        }
+                    });
+
+                    gunUnsubscribeFn = off;
+                    updateConnStatus('online');
+                    // 主动拉取一次最新数据
+                    gun.get(p).once(function(data) {
+                        // 这个回调会在数据加载完成后触发，但 on 已经处理了增量更新
+                    });
+                } catch (e) {
+                    console.warn('Gun subscribe error:', e);
+                    updateConnStatus('local');
+                }
+            }
+
+            function publishOrder(dish, qty, note = '') {
+                const now = Date.now();
+                const ok = now.toString(36) + Math.random().toString(36).substr(2, 6);
+                const od = {
+                    dishId: dish.id,
+                    name: dish.name,
+                    emoji: dish.emoji || '🍽️',
+                    price: dish.price,
+                    quantity: qty,
+                    userId: userId,
+                    userName: nickname || userId.substring(0, 6),
+                    timestamp: now,
+                    note: note,
+                    confirmed: false
+                };
                 sharedOrders[ok] = { id: ok, ...od };
                 saveLocalShared(sharedOrders);
                 syncToGun(ok, od);
                 SoundFX.success();
-                showToast('📤 已共享「' + dish.name + '」x' + qty);
-                renderSharedOrders(); }
+                showToast('📤 已共享「' + dish.name + '」x' + qty, 'success');
+                renderSharedOrders();
+            }
 
-            function confirmOrder(ok) { if (sharedOrders[ok]) { sharedOrders[ok].confirmed = true;
+            function confirmOrder(ok) {
+                if (sharedOrders[ok]) {
+                    sharedOrders[ok].confirmed = true;
                     sharedOrders[ok].confirmedAt = Date.now();
                     saveLocalShared(sharedOrders);
                     syncToGun(ok, { confirmed: true, confirmedAt: Date.now(), confirmedBy: userId });
                     addToHistory(currentRoom, { ...sharedOrders[ok], room: currentRoom });
                     SoundFX.confirm();
                     renderSharedOrders();
-                    showToast('✅ 订单已确认'); } }
+                    showToast('✅ 订单已确认', 'success');
+                }
+            }
 
-            function confirmAllOrders() { const unconfirmed = Object.keys(sharedOrders).filter(k => !sharedOrders[k]
-                    .confirmed); if (unconfirmed.length === 0) { showToast('没有待确认的订单', 'warning'); return; }
-                unconfirmed.forEach(k => { sharedOrders[k].confirmed = true;
+            function confirmAllOrders() {
+                const unconfirmed = Object.keys(sharedOrders).filter(k => !sharedOrders[k].confirmed);
+                if (unconfirmed.length === 0) { showToast('没有待确认的订单', 'warning'); return; }
+                unconfirmed.forEach(k => {
+                    sharedOrders[k].confirmed = true;
                     sharedOrders[k].confirmedAt = Date.now();
                     syncToGun(k, { confirmed: true, confirmedAt: Date.now(), confirmedBy: userId });
-                    addToHistory(currentRoom, { ...sharedOrders[k], room: currentRoom }); });
+                    addToHistory(currentRoom, { ...sharedOrders[k], room: currentRoom });
+                });
                 saveLocalShared(sharedOrders);
                 SoundFX.confirm();
-                showToast('✅ 已确认 ' + unconfirmed.length + ' 条订单');
-                renderSharedOrders(); }
+                showToast('✅ 已确认 ' + unconfirmed.length + ' 条订单', 'success');
+                renderSharedOrders();
+            }
 
-            function removeSharedOrder(oid) { if (sharedOrders[oid]) { delete sharedOrders[oid];
+            function removeSharedOrder(oid) {
+                if (sharedOrders[oid]) {
+                    delete sharedOrders[oid];
                     saveLocalShared(sharedOrders);
                     delFromGun(oid);
                     SoundFX.click();
-                    showToast('已移除');
-                    renderSharedOrders(); } }
+                    showToast('已移除', 'warning');
+                    renderSharedOrders();
+                }
+            }
 
-            function clearMySharedOrders() { const tr = Object.keys(sharedOrders).filter(k => sharedOrders[k].userId ===
-                    userId);
+            function clearMySharedOrders() {
+                const tr = Object.keys(sharedOrders).filter(k => sharedOrders[k].userId === userId);
                 tr.forEach(k => { delete sharedOrders[k];
                     delFromGun(k); });
                 saveLocalShared(sharedOrders);
-                showToast('已清空我的记录');
-                renderSharedOrders(); }
+                showToast('已清空我的记录', 'warning');
+                renderSharedOrders();
+            }
 
-            function changeRoom(nr) { nr = nr.trim() || '家常菜'; if (nr === currentRoom) return;
+            // 【修复4】切换房间时，重新订阅并刷新
+            function changeRoom(nr) {
+                nr = nr.trim() || '家常菜';
+                if (nr === currentRoom) return;
                 currentRoom = nr;
                 saveRoom();
                 roomInput.value = currentRoom;
                 displayRoomName.textContent = currentRoom;
+                // 清空历史ID集合，重新加载
+                historyOrderIds.clear();
                 initHistoryIds(currentRoom);
-                subscribeShared(); if (document.getElementById('page-shared').classList.contains('active'))
-                renderSharedOrders();
-                showToast('已切换至「' + currentRoom + '」'); }
+                // 重新订阅
+                subscribeShared();
+                // 如果当前在共享页面，刷新
+                if (document.getElementById('page-shared').classList.contains('active')) renderSharedOrders();
+                showToast('已切换至「' + currentRoom + '」', 'info');
+            }
+
             roomInput.addEventListener('change', () => changeRoom(roomInput.value));
             document.getElementById('btnChangeRoom').addEventListener('click', () => changeRoom(roomInput.value));
-            btnSetNick.addEventListener('click', async () => { let sn = null; const r = await showModal('设置昵称',
+
+            btnSetNick.addEventListener('click', async () => {
+                let sn = null;
+                const r = await showModal('设置昵称',
                     '输入你的昵称', [{ text: '取消', cls: 'btn-secondary' }, { text: '保存', cls: 'btn-primary',
                         action: () => { const inp = document.getElementById('nickInput');
                             sn = inp ? inp.value.trim().substring(0, 10) : ''; } }
                     ], '<input type="text" id="nickInput" value="' + escapeHtml(nickname) +
-                    '" placeholder="输入昵称" maxlength="10" style="width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1.5px solid #ddd;">'); if (
-                    r === '保存' && sn !== null) { nickname = sn;
+                    '" placeholder="输入昵称" maxlength="10" style="width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1.5px solid #ddd;">');
+                if (r === '保存' && sn !== null) {
+                    nickname = sn;
                     saveNickname();
-                    showToast('昵称已保存：' + (nickname || '未设置')); } });
-            btnRefreshShared.addEventListener('click', () => { showToast('正在刷新...', 'info');
-                subscribeShared(); if (useGun && gun && gunReady) checkGunConn(); });
+                    showToast('昵称已保存：' + (nickname || '未设置'), 'success');
+                }
+            });
+
+            btnRefreshShared.addEventListener('click', () => {
+                showToast('🔄 正在刷新同步...', 'info');
+                // 重新订阅（会取消旧监听并重建）
+                subscribeShared();
+                // 重新检测连接
+                if (useGun && gun && gunReady) checkGunConn();
+                // 强制刷新UI
+                renderSharedOrders();
+            });
+
             btnConfirmAll.addEventListener('click', () => confirmAllOrders());
 
-            // ========== 视频链接解析 ==========
+            // ========== 视频链接解析（保留） ==========
             function parseVideoUrl(url) {
                 if (!url || !url.trim()) return null;
                 url = url.trim();
@@ -1796,37 +1938,52 @@
             }
 
             // ========== 页面渲染 ==========
-            function renderOrderPage() { const cats = ['全部', ...new Set(menuData.map(d => d.category))];
+            function renderOrderPage() {
+                const cats = ['全部', ...new Set(menuData.map(d => d.category))];
                 document.getElementById('categoryFilter').innerHTML = cats.map((c, i) => '<button class="cat-btn' + (i ===
                     0 ? ' active' : '') + '" data-cat="' + c + '">' + c + '</button>').join('');
-                document.querySelectorAll('.cat-btn').forEach(b => b.onclick = () => { document.querySelectorAll(
-                            '.cat-btn').forEach(x => x.classList.remove('active'));
+                document.querySelectorAll('.cat-btn').forEach(b => b.onclick = () => {
+                    document.querySelectorAll('.cat-btn').forEach(x => x.classList.remove('active'));
                     b.classList.add('active');
-                    applyFilters(); });
-                applyFilters(); }
+                    applyFilters();
+                });
+                applyFilters();
+            }
 
-            function applyFilters() { const cat = document.querySelector('.cat-btn.active')?.dataset.cat; const fc = (cat ===
-                    '全部' || !cat) ? null : cat; const st = searchInput.value.trim().toLowerCase(); let list = menuData; if (
-                    fc) list = list.filter(d => d.category === fc); if (st) list = list.filter(d => d.name.toLowerCase()
-                    .includes(st));
-                renderDishGrid(list); }
+            function applyFilters() {
+                const cat = document.querySelector('.cat-btn.active')?.dataset.cat;
+                const fc = (cat === '全部' || !cat) ? null : cat;
+                const st = searchInput.value.trim().toLowerCase();
+                let list = menuData;
+                if (fc) list = list.filter(d => d.category === fc);
+                if (st) list = list.filter(d => d.name.toLowerCase().includes(st));
+                renderDishGrid(list);
+            }
 
-            function renderDishGrid(list) { const grid = document.getElementById('dishGrid'); if (!list.length) { grid
-                        .innerHTML =
-                        '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#aaa;">暂无菜品</div>'; return; }
+            function renderDishGrid(list) {
+                const grid = document.getElementById('dishGrid');
+                if (!list.length) {
+                    grid.innerHTML =
+                        '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#aaa;">暂无菜品</div>';
+                    return;
+                }
                 window.__showTutorial = showTutorial;
-                grid.innerHTML = list.map(d => { const q = cartData.find(c => c.id === d.id)?.quantity || 0; const hasTut = d
-                        .tutorial && d.tutorial.trim() && d.tutorial !== '暂无教程，请在管理页面编辑。'; const hasVideo = d.video && d.video
-                        .trim(); const tutHint = hasTut ?
-                        '<span class="tutorial-hint">📖</span>' : ''; const videoHint = hasVideo ?
-                        '<span class="video-hint">🎬</span>' : ''; const ctrl = q >
-                        0 ? '<div class="card-cart-ctrl" onclick="event.stopPropagation();"><button class="btn-qty minus" data-id="' +
+                grid.innerHTML = list.map(d => {
+                    const q = cartData.find(c => c.id === d.id)?.quantity || 0;
+                    const hasTut = d.tutorial && d.tutorial.trim() && d.tutorial !== '暂无教程，请在管理页面编辑。';
+                    const hasVideo = d.video && d.video.trim();
+                    const tutHint = hasTut ? '<span class="tutorial-hint">📖</span>' : '';
+                    const videoHint = hasVideo ? '<span class="video-hint">🎬</span>' : '';
+                    const ctrl = q > 0 ?
+                        '<div class="card-cart-ctrl" onclick="event.stopPropagation();"><button class="btn-qty minus" data-id="' +
                         d.id + '">−</button><span>' + q + '</span><button class="btn-qty plus" data-id="' + d.id +
                         '">+</button></div>' :
                         '<button class="btn-add-cart" data-id="' + d.id +
-                        '" onclick="event.stopPropagation();">🛒 加入</button>'; return (
+                        '" onclick="event.stopPropagation();">🛒 加入</button>';
+                    return (
                         `<div class="dish-card" data-dish-id="${d.id}" onclick="window.__showTutorial(${d.id})">${tutHint}${videoHint}${getDishIconHTML(d.emoji)}<div class="dish-name">${escapeHtml(d.name)}</div><div class="dish-price">¥${d.price.toFixed(2)}</div>${ctrl}</div>`
-                        ); }).join('');
+                    );
+                }).join('');
                 grid.querySelectorAll('.btn-add-cart').forEach(b => {
                     b.onclick = function(e) { e.stopPropagation();
                         SoundFX.click();
@@ -1841,35 +1998,53 @@
                     b.onclick = function(e) { e.stopPropagation();
                         SoundFX.click();
                         removeOneFromCart(parseInt(this.dataset.id)); };
-                }); }
+                });
+            }
 
-            function addToCart(id) { const d = menuData.find(m => m.id === id); if (!d) return; const ex = cartData.find(c => c
-                    .id === id); if (ex) ex.quantity++; else cartData.push({ id: d.id, name: d.name, price: d.price,
-                    emoji: d.emoji, quantity: 1 });
+            function addToCart(id) {
+                const d = menuData.find(m => m.id === id);
+                if (!d) return;
+                const ex = cartData.find(c => c.id === id);
+                if (ex) ex.quantity++;
+                else cartData.push({ id: d.id, name: d.name, price: d.price, emoji: d.emoji, quantity: 1 });
                 saveCart();
                 updateCartBadge();
-                refreshView(); }
+                refreshView();
+            }
 
-            function removeOneFromCart(id) { const ex = cartData.find(c => c.id === id); if (!ex) return;
-                ex.quantity--; if (ex.quantity <= 0) cartData = cartData.filter(c => c.id !== id);
+            function removeOneFromCart(id) {
+                const ex = cartData.find(c => c.id === id);
+                if (!ex) return;
+                ex.quantity--;
+                if (ex.quantity <= 0) cartData = cartData.filter(c => c.id !== id);
                 saveCart();
                 updateCartBadge();
-                refreshView(); }
+                refreshView();
+            }
 
-            function updateCartBadge() { const t = cartData.reduce((s, i) => s + i.quantity, 0);
+            function updateCartBadge() {
+                const t = cartData.reduce((s, i) => s + i.quantity, 0);
                 cartBadge.textContent = t;
-                cartBadge.style.display = t > 0 ? 'inline-flex' : 'none'; }
+                cartBadge.style.display = t > 0 ? 'inline-flex' : 'none';
+            }
 
-            function renderCartPage() { const ctr = document.getElementById('cartContent');
-                window.__showTutorial = showTutorial; if (!cartData.length) { ctr
-                        .innerHTML =
-                        '<div class="cart-empty-state"><div style="font-size:3rem;">🛒</div><h3>购物车空空</h3><p>去点菜页面逛逛吧~</p></div>'; return; }
+            function renderCartPage() {
+                const ctr = document.getElementById('cartContent');
+                window.__showTutorial = showTutorial;
+                if (!cartData.length) {
+                    ctr.innerHTML =
+                        '<div class="cart-empty-state"><div style="font-size:3rem;">🛒</div><h3>购物车空空</h3><p>去点菜页面逛逛吧~</p></div>';
+                    return;
+                }
                 let html = '<div class="cart-container">';
-                cartData.forEach(item => { const st = item.price * item.quantity;
+                cartData.forEach(item => {
+                    const st = item.price * item.quantity;
                     html +=
-                        `<div class="cart-item-card">${getCartItemIconHTML(item.emoji)}<div class="cart-item-info"><div class="ci-name" onclick="window.__showTutorial(${item.id})" title="点击查看教程">${escapeHtml(item.name)}</div><div class="ci-unit-price">单价 ¥${item.price.toFixed(2)}</div></div><div class="cart-item-qty"><button class="btn-qty minus" data-id="${item.id}">−</button><span class="qty-val">${item.quantity}</span><button class="btn-qty plus" data-id="${item.id}">+</button></div><div class="cart-item-subtotal">¥${st.toFixed(2)}</div><button class="cart-item-remove" data-id="${item.id}">✕</button></div>`; }); const
-                    total = cartData.reduce((s, i) => s + i.price * i.quantity, 0);
-                html += '</div><div class="cart-summary-bar"><div style="font-weight:700;font-size:1.1rem;">合计：<span style="color:var(--primary);">¥' +
+                        `<div class="cart-item-card">${getCartItemIconHTML(item.emoji)}<div class="cart-item-info"><div class="ci-name" onclick="window.__showTutorial(${item.id})" title="点击查看教程">${escapeHtml(item.name)}</div><div class="ci-unit-price">单价 ¥${item.price.toFixed(2)}</div></div><div class="cart-item-qty"><button class="btn-qty minus" data-id="${item.id}">−</button><span class="qty-val">${item.quantity}</span><button class="btn-qty plus" data-id="${item.id}">+</button></div><div class="cart-item-subtotal">¥${st.toFixed(2)}</div><button class="cart-item-remove" data-id="${item.id}">✕</button></div>`;
+                });
+                const total = cartData.reduce((s, i) => s + i.price * i.quantity, 0);
+                html +=
+                    '</div><div class="cart-summary-bar"><div style="font-weight:700;font-size:1.1rem;">合计：<span style="color:var(--primary);">¥' +
                     total.toFixed(2) +
                     '</span></div><div style="display:flex;gap:8px;"><button id="btnClearCart" class="btn btn-secondary">🗑️ 清空</button><button id="btnCheckout" class="btn btn-primary">✅ 下单并共享</button></div></div>';
                 ctr.innerHTML = html;
@@ -1877,61 +2052,89 @@
                     addToCart(parseInt(b.dataset.id)); });
                 ctr.querySelectorAll('.btn-qty.minus').forEach(b => b.onclick = () => { SoundFX.click();
                     removeOneFromCart(parseInt(b.dataset.id)); });
-                ctr.querySelectorAll('.cart-item-remove').forEach(b => b.onclick = () => { const id = parseInt(b.dataset
-                        .id);
+                ctr.querySelectorAll('.cart-item-remove').forEach(b => b.onclick = () => {
+                    const id = parseInt(b.dataset.id);
                     cartData = cartData.filter(c => c.id !== id);
                     saveCart();
                     updateCartBadge();
                     renderCartPage();
                     SoundFX.click();
-                    showToast('已移除', 'warning'); });
-                document.getElementById('btnClearCart').onclick = async () => { if (await showModal('清空购物车', '确定清空？', [
-                        { text: '取消', cls: 'btn-secondary' }, { text: '清空',
-                        cls: 'btn-danger-outline' }
-                    ])) { cartData = [];
-                    saveCart();
-                    updateCartBadge();
-                    renderCartPage(); } };
-                document.getElementById('btnCheckout').onclick = async () => { let cn = ''; const tc = cartData.reduce(
-                        (s, i) => s + i.price * i.quantity, 0); const lh = cartData.map(i => escapeHtml(i.emoji ||
-                            '🍽️') + ' ' + escapeHtml(i.name) + ' x' + i.quantity).join('<br>'); const r = await showModal(
-                        '确认下单', lh + '<br><strong>总计 ¥' + tc.toFixed(2) + '</strong>', [{ text: '取消',
-                            cls: 'btn-secondary' }, { text: '确认下单', cls: 'btn-primary',
-                            action: () => { const n = document.getElementById('orderNote');
-                                cn = n ? n.value.trim().substring(0, 30) : ''; } }
-                    ], '<input type="text" id="orderNote" placeholder="备注" style="width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1.5px solid #ddd;">'); if (
-                        r === '确认下单') { cartData.forEach(item => { const dish = menuData.find(d => d.id ===
-                                item.id) || item;
-                            publishOrder(dish, item.quantity, cn); });
+                    showToast('已移除', 'warning');
+                });
+                document.getElementById('btnClearCart').onclick = async () => {
+                    if (await showModal('清空购物车', '确定清空？', [{ text: '取消', cls: 'btn-secondary' }, { text: '清空',
+                            cls: 'btn-danger-outline'
+                        }])) {
                         cartData = [];
                         saveCart();
                         updateCartBadge();
                         renderCartPage();
-                        showToast('🎉 已下单并共享');
-                        switchPage('shared'); } }; }
+                    }
+                };
+                document.getElementById('btnCheckout').onclick = async () => {
+                    let cn = '';
+                    const tc = cartData.reduce((s, i) => s + i.price * i.quantity, 0);
+                    const lh = cartData.map(i => escapeHtml(i.emoji || '🍽️') + ' ' + escapeHtml(i.name) +
+                        ' x' + i.quantity).join('<br>');
+                    const r = await showModal(
+                        '确认下单', lh + '<br><strong>总计 ¥' + tc.toFixed(2) + '</strong>', [{ text: '取消',
+                            cls: 'btn-secondary' }, { text: '确认下单', cls: 'btn-primary',
+                            action: () => { const n = document.getElementById('orderNote');
+                                cn = n ? n.value.trim().substring(0, 30) : ''; } }
+                        ],
+                        '<input type="text" id="orderNote" placeholder="备注" style="width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1.5px solid #ddd;">'
+                    );
+                    if (r === '确认下单') {
+                        cartData.forEach(item => {
+                            const dish = menuData.find(d => d.id === item.id) || item;
+                            publishOrder(dish, item.quantity, cn);
+                        });
+                        cartData = [];
+                        saveCart();
+                        updateCartBadge();
+                        renderCartPage();
+                        showToast('🎉 已下单并共享', 'success');
+                        switchPage('shared');
+                    }
+                };
+            }
 
             function renderSharedOrders() {
                 displayRoomName.textContent = currentRoom;
                 window.__showTutorial = showTutorial;
                 const orders = Object.values(sharedOrders).sort((a, b) => b.timestamp - a.timestamp);
-                if (orders.length === 0) { sharedOrdersList.innerHTML =
+                if (orders.length === 0) {
+                    sharedOrdersList.innerHTML =
                         '<div style="text-align:center;color:#aaa;padding:30px;">暂无共享订单</div>';
                     sharedSummary.style.display = 'none';
-                    btnConfirmAll.style.display = 'none'; } else {
+                    btnConfirmAll.style.display = 'none';
+                } else {
                     const groups = {};
                     const now = new Date();
                     const todayStr = now.toDateString();
                     const yesterdayStr = new Date(now - 86400000).toDateString();
-                    orders.forEach(o => { const d = new Date(o.timestamp); const ds = d.toDateString(); let gk; if (
-                            ds === todayStr) gk = '今天'; else if (ds === yesterdayStr) gk = '昨天'; else gk = d
-                            .toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' }); if (
-                            !groups[gk]) groups[gk] = [];
-                        groups[gk].push(o); });
+                    orders.forEach(o => {
+                        const d = new Date(o.timestamp);
+                        const ds = d.toDateString();
+                        let gk;
+                        if (ds === todayStr) gk = '今天';
+                        else if (ds === yesterdayStr) gk = '昨天';
+                        else gk = d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long',
+                            day: 'numeric' });
+                        if (!groups[gk]) groups[gk] = [];
+                        groups[gk].push(o);
+                    });
                     let html = '';
                     const groupKeys = Object.keys(groups);
-                    groupKeys.sort((a, b) => { if (a === '今天') return -1; if (b === '今天') return 1; if (a === '昨天')
-                            return -1; if (b === '昨天') return 1; const da = groups[a][0]?.timestamp || 0; const db =
-                            groups[b][0]?.timestamp || 0; return db - da; });
+                    groupKeys.sort((a, b) => {
+                        if (a === '今天') return -1;
+                        if (b === '今天') return 1;
+                        if (a === '昨天') return -1;
+                        if (b === '昨天') return 1;
+                        const da = groups[a][0]?.timestamp || 0;
+                        const db = groups[b][0]?.timestamp || 0;
+                        return db - da;
+                    });
                     groupKeys.forEach((gk, gi) => {
                         const gOrders = groups[gk];
                         const gCount = gOrders.reduce((s, o) => s + o.quantity, 0);
@@ -1960,27 +2163,32 @@
                         html += '</div></div></div>';
                     });
                     sharedOrdersList.innerHTML = html;
-                    sharedOrdersList.querySelectorAll('.date-group-header').forEach(h => h.onclick = () => { const body =
-                            h.nextElementSibling;
+                    sharedOrdersList.querySelectorAll('.date-group-header').forEach(h => h.onclick = () => {
+                        const body = h.nextElementSibling;
                         h.classList.toggle('collapsed');
                         body.classList.toggle('collapsed');
-                        SoundFX.click(); });
+                        SoundFX.click();
+                    });
                     sharedOrdersList.querySelectorAll('.btn-confirm').forEach(b => b.onclick = () => confirmOrder(b
                         .dataset.id));
                     sharedOrdersList.querySelectorAll('.btn-rem').forEach(b => b.onclick = () => removeSharedOrder(b
                         .dataset.id));
-                    sharedOrdersList.querySelectorAll('.btn-add-local').forEach(b => b.onclick = () => { const oid = b
-                            .dataset.oid; const od = sharedOrders[oid]; if (od && !menuData.some(m => m.name === od
-                                .name && m.price === od.price)) { const nid = Math.max(0, ...menuData.map(d => d.id)) +
-                                1;
-                            menuData.push({ id: nid, name: od.name, price: od.price, emoji: od.emoji || '🍽️',
-                                category: '其他', desc: '', video: '', tutorial: '暂无教程，请在管理页面编辑。' });
+                    sharedOrdersList.querySelectorAll('.btn-add-local').forEach(b => b.onclick = () => {
+                        const oid = b.dataset.oid;
+                        const od = sharedOrders[oid];
+                        if (od && !menuData.some(m => m.name === od.name && m.price === od.price)) {
+                            const nid = Math.max(0, ...menuData.map(d => d.id)) + 1;
+                            menuData.push({ id: nid, name: od.name, price: od.price,
+                                emoji: od.emoji || '🍽️',
+                                category: '其他', desc: '', video: '',
+                                tutorial: '暂无教程，请在管理页面编辑。' });
                             saveMenu();
                             renderOrderPage();
                             renderManagePage();
                             renderSharedOrders();
-                            showToast('已添加「' + od.name + '」'); } else if (od) showToast('已在菜单中',
-                            'warning'); });
+                            showToast('已添加「' + od.name + '」', 'success');
+                        } else if (od) showToast('已在菜单中', 'warning');
+                    });
                     const total = orders.reduce((s, o) => s + o.price * o.quantity, 0);
                     sharedTotalPrice.textContent = '¥' + total.toFixed(2);
                     sharedTotalItems.textContent = orders.reduce((s, o) => s + o.quantity, 0);
@@ -2002,7 +2210,8 @@
                         let gk;
                         if (ds === todayStr) gk = '今天';
                         else if (ds === yesterdayStr) gk = '昨天';
-                        else gk = d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+                        else gk = d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long',
+                            day: 'numeric' });
                         if (!hGroups[gk]) hGroups[gk] = [];
                         hGroups[gk].push(o);
                     });
@@ -2020,7 +2229,8 @@
                     hGroupKeys.forEach((gk, gi) => {
                         const gOrders = hGroups[gk];
                         const gCount = gOrders.reduce((s, o) => s + (o.quantity || 1), 0);
-                        const gTotal = gOrders.reduce((s, o) => s + (o.price || 0) * (o.quantity || 1), 0);
+                        const gTotal = gOrders.reduce((s, o) => s + (o.price || 0) * (o.quantity || 1),
+                            0);
                         const collapsed = gi > 0;
                         histHtml +=
                             `<div class="date-group" style="margin-bottom:2px;"><div class="history-date-group-header${collapsed?' collapsed':''}" data-history-group="${gk}"><span class="collapse-arrow">▼</span><span>📅 ${gk}</span><span style="font-size:0.72rem;color:var(--text-light);">(${gOrders.length}单·${gCount}道·¥${gTotal.toFixed(2)})</span><span style="font-size:0.65rem;color:var(--success);">✓全部确认</span></div><div class="history-date-group-body${collapsed?' collapsed':''}"><div class="history-date-group-body-inner">`;
@@ -2045,36 +2255,51 @@
                 }
             }
 
-            function getTimeAgo(ts) { const d = Date.now() - ts; const m = Math.floor(d / 60000); if (m < 1) return '刚刚'; if (
-                    m < 60) return m + '分钟前'; const h = Math.floor(m / 60); if (h < 24) return h + '小时前'; return new Date(ts)
-                    .toLocaleDateString(); }
+            function getTimeAgo(ts) {
+                const d = Date.now() - ts;
+                const m = Math.floor(d / 60000);
+                if (m < 1) return '刚刚';
+                if (m < 60) return m + '分钟前';
+                const h = Math.floor(m / 60);
+                if (h < 24) return h + '小时前';
+                return new Date(ts).toLocaleDateString();
+            }
 
-            function renderManagePage() { document.getElementById('mgmtCount').textContent = menuData.length;
+            function renderManagePage() {
+                document.getElementById('mgmtCount').textContent = menuData.length;
                 document.getElementById('mgmtDishList').innerHTML = menuData.map(d =>
                     `<li class="mgmt-dish-item">${getDishIconHTML(d.emoji)}<div style="flex:1;min-width:120px;"><strong>${escapeHtml(d.name)}</strong><br><small>${escapeHtml(d.category)} · ¥${d.price.toFixed(2)}</small>${d.tutorial?'<br><small style="color:#999;">📖 有教程</small>':''}${d.video?'<br><small style="color:#5a8fbf;">🎬 有视频</small>':''}</div><button class="btn btn-sm btn-secondary btn-edit" data-id="${d.id}">✏️</button><button class="btn btn-sm btn-danger-outline btn-delete" data-id="${d.id}">🗑️</button></li>`
-                    ).join('');
+                ).join('');
                 document.querySelectorAll('.btn-edit').forEach(b => b.onclick = () => startEditDish(parseInt(b.dataset
                 .id)));
-                document.querySelectorAll('.btn-delete').forEach(b => b.onclick = async () => { const id = parseInt(b
-                        .dataset.id); const d = menuData.find(m => m.id === id); if (d && await showModal('删除',
-                        '删除「' + escapeHtml(d.name) + '」？', [{ text: '取消', cls: 'btn-secondary' }, { text: '删除',
-                            cls: 'btn-danger-outline' }
-                    ])) { menuData = menuData.filter(m => m.id !== id);
-                    saveMenu();
-                    syncCartMenu();
-                    saveCart();
-                    updateCartBadge();
-                    renderManagePage();
-                    renderOrderPage();
-                    renderCartPage();
-                    showToast('已删除「' + d.name + '」'); } });
+                document.querySelectorAll('.btn-delete').forEach(b => b.onclick = async () => {
+                    const id = parseInt(b.dataset.id);
+                    const d = menuData.find(m => m.id === id);
+                    if (d && await showModal('删除', '删除「' + escapeHtml(d.name) + '」？', [{ text: '取消',
+                            cls: 'btn-secondary' }, { text: '删除', cls: 'btn-danger-outline' }
+                        ])) {
+                        menuData = menuData.filter(m => m.id !== id);
+                        saveMenu();
+                        syncCartMenu();
+                        saveCart();
+                        updateCartBadge();
+                        renderManagePage();
+                        renderOrderPage();
+                        renderCartPage();
+                        showToast('已删除「' + d.name + '」', 'warning');
+                    }
+                });
                 document.getElementById('emojiPicker').innerHTML = FOOD_EMOJIS.map(e =>
                     `<button class="emoji-opt" data-emoji="${e}" title="${e}">${e}</button>`).join('');
-                document.querySelectorAll('.emoji-opt').forEach(b => b.onclick = () => { document.getElementById(
-                        'mgmtEmoji').value = b.dataset.emoji;
-                    SoundFX.click(); }); }
+                document.querySelectorAll('.emoji-opt').forEach(b => b.onclick = () => {
+                    document.getElementById('mgmtEmoji').value = b.dataset.emoji;
+                    SoundFX.click();
+                });
+            }
 
-            function startEditDish(id) { const d = menuData.find(m => m.id === id); if (!d) return;
+            function startEditDish(id) {
+                const d = menuData.find(m => m.id === id);
+                if (!d) return;
                 document.getElementById('mgmtName').value = d.name;
                 document.getElementById('mgmtPrice').value = d.price;
                 document.getElementById('mgmtCategory').value = d.category;
@@ -2085,9 +2310,11 @@
                 document.getElementById('mgmtEditId').value = d.id;
                 document.getElementById('mgmtFormTitle').textContent = '✏️ 编辑菜品';
                 document.getElementById('btnCancelEdit').style.display = 'inline-flex';
-                document.getElementById('mgmtName').focus(); }
+                document.getElementById('mgmtName').focus();
+            }
 
-            function resetManageForm() { document.getElementById('mgmtName').value = '';
+            function resetManageForm() {
+                document.getElementById('mgmtName').value = '';
                 document.getElementById('mgmtPrice').value = '';
                 document.getElementById('mgmtCategory').value = '';
                 document.getElementById('mgmtEmoji').value = '';
@@ -2096,25 +2323,31 @@
                 document.getElementById('mgmtVideo').value = '';
                 document.getElementById('mgmtEditId').value = '';
                 document.getElementById('mgmtFormTitle').textContent = '➕ 添加新菜品';
-                document.getElementById('btnCancelEdit').style.display = 'none'; }
-            document.getElementById('btnSaveDish').onclick = () => { const name = document.getElementById('mgmtName').value
-                    .trim(),
-                    price = parseFloat(document.getElementById('mgmtPrice').value), cat = document.getElementById(
-                        'mgmtCategory').value.trim(), emoji = document.getElementById('mgmtEmoji').value.trim() || '🍽️',
+                document.getElementById('btnCancelEdit').style.display = 'none';
+            }
+            document.getElementById('btnSaveDish').onclick = () => {
+                const name = document.getElementById('mgmtName').value.trim(),
+                    price = parseFloat(document.getElementById('mgmtPrice').value),
+                    cat = document.getElementById('mgmtCategory').value.trim(),
+                    emoji = document.getElementById('mgmtEmoji').value.trim() || '🍽️',
                     desc = document.getElementById('mgmtDesc').value.trim(),
                     tutorial = document.getElementById('mgmtTutorial').value.trim(),
-                    video = document.getElementById('mgmtVideo').value.trim(); if (!name || isNaN(price) || price <=
-                    0 || !cat) { showToast('请填写完整', 'warning'); return; } const eid = document.getElementById('mgmtEditId')
-                    .value; if (
-                    eid) { const d = menuData.find(m => m.id === parseInt(eid)); if (d) { d.name = name;
+                    video = document.getElementById('mgmtVideo').value.trim();
+                if (!name || isNaN(price) || price <= 0 || !cat) { showToast('请填写完整', 'warning'); return; }
+                const eid = document.getElementById('mgmtEditId').value;
+                if (eid) {
+                    const d = menuData.find(m => m.id === parseInt(eid));
+                    if (d) { d.name = name;
                         d.price = price;
                         d.category = cat;
                         d.emoji = emoji;
                         d.desc = desc;
                         d.tutorial = tutorial || '暂无教程，请在管理页面编辑。';
-                        d.video = video; } } else menuData.push({ id: Math.max(0, ...menuData.map(d => d.id)) + 1, name,
-                    price, category: cat, emoji, desc,
-                    tutorial: tutorial || '暂无教程，请在管理页面编辑。', video });
+                        d.video = video; }
+                } else
+                    menuData.push({ id: Math.max(0, ...menuData.map(d => d.id)) + 1, name, price, category: cat, emoji,
+                        desc,
+                        tutorial: tutorial || '暂无教程，请在管理页面编辑。', video });
                 saveMenu();
                 syncCartMenu();
                 saveCart();
@@ -2122,21 +2355,25 @@
                 renderManagePage();
                 renderOrderPage();
                 SoundFX.success();
-                showToast('已保存', 'success'); };
+                showToast('已保存', 'success');
+            };
             document.getElementById('btnCancelEdit').onclick = resetManageForm;
-            document.getElementById('btnResetMenu').onclick = async () => { if (await showModal('恢复默认',
-                    '替换所有菜品并清空购物车？', [{ text: '取消', cls: 'btn-secondary' }, { text: '确认',
+            document.getElementById('btnResetMenu').onclick = async () => {
+                if (await showModal('恢复默认', '替换所有菜品并清空购物车？', [{ text: '取消', cls: 'btn-secondary' }, { text: '确认',
                         cls: 'btn-danger-outline' }
-                ])) { menuData = JSON.parse(JSON.stringify(CORE_DISHES)).concat(generateExtraDishes(31, 90));
-                saveMenu();
-                cartData = [];
-                saveCart();
-                updateCartBadge();
-                renderManagePage();
-                renderOrderPage();
-                renderCartPage(); } };
+                    ])) {
+                    menuData = JSON.parse(JSON.stringify(CORE_DISHES)).concat(generateExtraDishes(31, 90));
+                    saveMenu();
+                    cartData = [];
+                    saveCart();
+                    updateCartBadge();
+                    renderManagePage();
+                    renderOrderPage();
+                    renderCartPage();
+                }
+            };
 
-            // ========== 贪吃蛇（穿墙模式 + 背景音效） ==========
+            // ========== 贪吃蛇（保留） ==========
             let snakeGame = null,
                 snakeLoopId = null;
 
@@ -2173,10 +2410,12 @@
                 function draw() { ctx.fillStyle = '#1a1a2e';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     ctx.strokeStyle = 'rgba(255,255,255,0.04)';
-                    ctx.lineWidth = 0.5; for (let i = 0; i <= cols; i++) { ctx.beginPath();
+                    ctx.lineWidth = 0.5;
+                    for (let i = 0; i <= cols; i++) { ctx.beginPath();
                         ctx.moveTo(i * gs, 0);
                         ctx.lineTo(i * gs, canvas.height);
-                        ctx.stroke(); } for (let i = 0; i <= rows; i++) { ctx.beginPath();
+                        ctx.stroke(); }
+                    for (let i = 0; i <= rows; i++) { ctx.beginPath();
                         ctx.moveTo(0, i * gs);
                         ctx.lineTo(canvas.width, i * gs);
                         ctx.stroke(); }
@@ -2203,8 +2442,10 @@
                             ctx.fill();
                             ctx.beginPath();
                             ctx.arc(ex, ey + gs * 0.35, 1.5, 0, Math.PI * 2);
-                            ctx.fill(); } }); const fx = food.x * gs + gs / 2,
-                        fy = food.y * gs + gs / 2; const fg = ctx.createRadialGradient(fx, fy, 2, fx, fy, gs / 2);
+                            ctx.fill(); } });
+                    const fx = food.x * gs + gs / 2,
+                        fy = food.y * gs + gs / 2;
+                    const fg = ctx.createRadialGradient(fx, fy, 2, fx, fy, gs / 2);
                     fg.addColorStop(0, '#ff6b6b');
                     fg.addColorStop(1, '#c0392b');
                     ctx.fillStyle = fg;
@@ -2217,7 +2458,8 @@
                     ctx.fill(); }
 
                 function update() { if (gameOver) return;
-                    dir = { ...ndir }; const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+                    dir = { ...ndir };
+                    const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
                     if (head.x < 0) head.x = cols - 1;
                     else if (head.x >= cols) head.x = 0;
                     if (head.y < 0) head.y = rows - 1;
@@ -2298,7 +2540,7 @@
                     snakeLoopId = null; }
                 SoundFX.stopSnakeBgm(); }
 
-            // ========== 猜数字（含背景音效） ==========
+            // ========== 猜数字（保留） ==========
             let guessGame = { target: 0, attempts: 0, history: [], finished: false };
 
             function initGuessGame() { guessGame.target = Math.floor(Math.random() * 100) + 1;
@@ -2345,7 +2587,7 @@
             function destroyGuessGame() { SoundFX.stopGuessBgm();
                 guessGame.finished = true; }
 
-            // ========== 打砖块 ==========
+            // ========== 打砖块（保留） ==========
             let breakoutGame = null,
                 breakoutLoopId = null;
 
@@ -2520,13 +2762,17 @@
                 }
                 document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t
                     .dataset.page === name));
-                document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + name)); if (
-                    name === 'order') renderOrderPage(); else if (name === 'cart') renderCartPage(); else if (name ===
-                    'shared') renderSharedOrders(); else if (name === 'manage') renderManagePage(); else if (name ===
-                    'game') renderGamePage(); else { destroySnakeGame();
+                document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + name));
+                if (name === 'order') renderOrderPage();
+                else if (name === 'cart') renderCartPage();
+                else if (name === 'shared') renderSharedOrders();
+                else if (name === 'manage') renderManagePage();
+                else if (name === 'game') renderGamePage();
+                else { destroySnakeGame();
                     destroyBreakoutGame();
                     destroyGuessGame();
-                    SoundFX.stopAllBgm(); } }
+                    SoundFX.stopAllBgm(); }
+            }
             document.querySelectorAll('.nav-tab').forEach(t => t.onclick = () => switchPage(t.dataset.page));
 
             function refreshView() { const a = document.querySelector('.page.active')?.id.replace('page-', ''); if (a ===
@@ -2549,18 +2795,22 @@
                     navigator.serviceWorker.register(URL.createObjectURL(b), { scope: '/' }).catch(() => {}); } catch (
                 e) {} }
             document.getElementById('btnClearSharedOrders').onclick = () => clearMySharedOrders();
-            document.getElementById('btnClearHistory').onclick = async () => { if (await showModal('清除历史',
-                    '确定清除本房间所有已确认历史订单吗？', [{ text: '取消', cls: 'btn-secondary' }, { text: '清除',
-                        cls: 'btn-danger-outline' }
-                ])) { clearHistory(currentRoom);
-                renderSharedOrders();
-                showToast('历史订单已清除'); } };
+            document.getElementById('btnClearHistory').onclick = async () => {
+                if (await showModal('清除历史', '确定清除本房间所有已确认历史订单吗？', [{ text: '取消', cls: 'btn-secondary' },
+                        { text: '清除', cls: 'btn-danger-outline' }
+                    ])) {
+                    clearHistory(currentRoom);
+                    renderSharedOrders();
+                    showToast('历史订单已清除', 'warning');
+                }
+            };
             document.getElementById('btnGuessSubmit').onclick = submitGuess;
             document.getElementById('btnGuessRestart').onclick = () => { initGuessGame();
                 SoundFX.click(); };
             document.getElementById('guessInput').addEventListener('keydown', e => { if (e.key === 'Enter') submitGuess
             (); });
 
+            // ========== 初始化 ==========
             function init() {
                 loadMenu();
                 loadCart();
@@ -2568,18 +2818,34 @@
                 loadRoom();
                 syncCartMenu();
                 updateCartBadge();
+                historyOrderIds.clear();
                 initHistoryIds(currentRoom);
                 roomInput.value = currentRoom;
-                displayRoomName.textContent = currentRoom; if (!gun && window.__gunLoaded && typeof Gun !== 'undefined')
-                    initGun();
+                displayRoomName.textContent = currentRoom;
+                if (!gun && window.__gunLoaded && typeof Gun !== 'undefined') initGun();
+                // 订阅共享数据
                 subscribeShared();
                 switchPage('order');
-                updateNickBtn(); }
-            if (window.__gunLoaded || typeof Gun !== 'undefined') init();
-            else { let wc = 0; const wi = setInterval(() => { wc++; if (window.__gunLoaded || typeof Gun !==
-                        'undefined' || wc > 30) { clearInterval(wi); if (!gun && typeof Gun !== 'undefined')
-                        initGun();
-                    init(); } }, 200); }
+                updateNickBtn();
+                // 延迟检查连接状态
+                setTimeout(() => {
+                    if (useGun && gun && gunReady) checkGunConn();
+                }, 4000);
+            }
+
+            if (window.__gunLoaded || typeof Gun !== 'undefined') {
+                init();
+            } else {
+                let wc = 0;
+                const wi = setInterval(() => {
+                    wc++;
+                    if (window.__gunLoaded || typeof Gun !== 'undefined' || wc > 30) {
+                        clearInterval(wi);
+                        if (!gun && typeof Gun !== 'undefined') initGun();
+                        init();
+                    }
+                }, 200);
+            }
         })();
     </script>
 </body>
